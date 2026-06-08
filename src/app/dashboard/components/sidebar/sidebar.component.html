@@ -2,13 +2,20 @@
   <div class="brand">Arriendos Ya</div>
 
   <nav class="menu">
-    <a
-      *ngFor="let item of menuItems; let isFirst = first"
-      class="menu-item"
-      [class.active]="isFirst"
-      href="#"
-      >{{ item }}</a
-    >
+    <ng-container *ngFor="let item of menuItems">
+      <a
+        *ngIf="item.path; else staticMenuItem"
+        class="menu-item"
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+        >{{ item.label }}</a
+      >
+
+      <ng-template #staticMenuItem>
+        <span class="menu-item menu-item-disabled">{{ item.label }}</span>
+      </ng-template>
+    </ng-container>
   </nav>
 
   <div class="user-card">

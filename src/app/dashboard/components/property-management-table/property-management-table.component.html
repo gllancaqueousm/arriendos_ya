@@ -1,0 +1,72 @@
+<section class="table-card">
+  <div class="table-header">
+    <div>
+      <p class="eyebrow">Listado</p>
+      <h2>Mantener Propiedades</h2>
+    </div>
+
+    <button type="button" class="primary-button">Nueva Propiedad</button>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th *ngFor="let column of visibleColumns">{{ column }}</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr
+          *ngFor="let property of properties"
+          [class.selected]="property.id === selectedPropertyId"
+          (click)="selectProperty.emit(property)"
+        >
+          <td>{{ property.id }}</td>
+          <td>
+            <div class="primary-cell">{{ property.address }}</div>
+          </td>
+          <td>{{ property.comuna }}</td>
+          <td>
+            <span class="status-pill" [ngClass]="getStatusClass(property.status)">
+              {{ property.status }}
+            </span>
+          </td>
+          <td>{{ property.corredor }}</td>
+          <td>{{ property.owner }}</td>
+          <td>
+            <div class="actions">
+              <button type="button" (click)="selectProperty.emit(property); $event.stopPropagation()">
+                Editar
+              </button>
+              <button type="button" (click)="selectProperty.emit(property); $event.stopPropagation()">
+                Ver
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <tr *ngIf="!properties.length">
+          <td colspan="7" class="empty-state">
+            No hay propiedades que coincidan con los filtros seleccionados.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer class="table-footer">
+    <p>Mostrando {{ rangeStart }}-{{ rangeEnd }} de {{ totalItems }} propiedades</p>
+
+    <div class="pagination">
+      <button type="button" (click)="previousPage.emit()" [disabled]="currentPage === 1">
+        Anterior
+      </button>
+      <span>Página {{ currentPage }} de {{ totalPages }}</span>
+      <button type="button" (click)="nextPage.emit()" [disabled]="currentPage === totalPages">
+        Siguiente
+      </button>
+    </div>
+  </footer>
+</section>
