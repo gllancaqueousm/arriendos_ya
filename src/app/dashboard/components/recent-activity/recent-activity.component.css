@@ -1,0 +1,31 @@
+.card {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.08);
+}
+
+h3 {
+  margin-top: 0;
+}
+
+.activity-item + .activity-item {
+  border-top: 1px solid #edf0f7;
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+}
+
+.title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.description {
+  margin: 0.3rem 0;
+  color: #636b86;
+}
+
+time {
+  font-size: 0.82rem;
+  color: #8a90a6;
+}

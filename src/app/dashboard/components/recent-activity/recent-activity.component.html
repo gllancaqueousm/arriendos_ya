@@ -1,0 +1,9 @@
+<section class="card">
+  <h3>Actividad reciente</h3>
+
+  <article *ngFor="let activity of activities" class="activity-item">
+    <p class="title">{{ activity.title }}</p>
+    <p class="description">{{ activity.description }}</p>
+    <time>{{ activity.time }}</time>
+  </article>
+</section>

@@ -1,0 +1,21 @@
+<aside class="sidebar">
+  <div class="brand">Arriendos Ya</div>
+
+  <nav class="menu">
+    <a
+      *ngFor="let item of menuItems; let isFirst = first"
+      class="menu-item"
+      [class.active]="isFirst"
+      href="#"
+      >{{ item }}</a
+    >
+  </nav>
+
+  <div class="user-card">
+    <span class="avatar">GY</span>
+    <div>
+      <p class="name">Guille Y.</p>
+      <p class="role">Administrador</p>
+    </div>
+  </div>
+</aside>

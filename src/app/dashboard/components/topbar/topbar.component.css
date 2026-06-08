@@ -1,0 +1,44 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e7e9f2;
+  background: #ffffff;
+}
+
+.search {
+  flex: 1;
+  max-width: 35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #f4f6fb;
+  border-radius: 999px;
+  padding: 0.65rem 1rem;
+  color: #6d7488;
+}
+
+.search input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-size: 0.95rem;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.actions button {
+  border: 0;
+  background: #f3f5fb;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  cursor: pointer;
+}

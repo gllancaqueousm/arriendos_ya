@@ -1,0 +1,19 @@
+<div class="dashboard-layout">
+  <app-sidebar class="sidebar-column"></app-sidebar>
+
+  <div class="main-column">
+    <app-topbar></app-topbar>
+
+    <main class="dashboard-content">
+      <section class="summary-grid">
+        <app-finance-summary></app-finance-summary>
+        <app-portfolio-status></app-portfolio-status>
+      </section>
+
+      <section class="detail-grid">
+        <app-quick-actions></app-quick-actions>
+        <app-recent-activity></app-recent-activity>
+      </section>
+    </main>
+  </div>
+</div>

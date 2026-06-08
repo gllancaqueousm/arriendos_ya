@@ -1,0 +1,13 @@
+<section class="card">
+  <h3>Estado del portafolio</h3>
+
+  <article *ngFor="let item of items" class="status-item">
+    <header>
+      <span>{{ item.name }}</span>
+      <strong>{{ item.value }}%</strong>
+    </header>
+    <div class="bar">
+      <span [style.width.%]="item.value"></span>
+    </div>
+  </article>
+</section>
