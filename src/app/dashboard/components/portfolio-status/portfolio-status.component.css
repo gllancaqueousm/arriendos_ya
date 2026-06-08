@@ -1,0 +1,35 @@
+.card {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.08);
+}
+
+h3 {
+  margin: 0 0 1rem;
+}
+
+.status-item + .status-item {
+  margin-top: 0.9rem;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+  color: #3a425c;
+}
+
+.bar {
+  background: #edf0f8;
+  border-radius: 999px;
+  height: 0.5rem;
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4e62ff, #7d8bff);
+}
