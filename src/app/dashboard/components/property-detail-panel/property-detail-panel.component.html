@@ -1,0 +1,64 @@
+<aside class="detail-card">
+  <ng-container *ngIf="editableProperty as property; else emptyState">
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">Detalle</p>
+        <h2>{{ property.address }}</h2>
+      </div>
+      <span class="property-id">{{ property.id }}</span>
+    </div>
+
+    <div class="field-grid">
+      <label class="field">
+        <span>Comuna</span>
+        <input type="text" [(ngModel)]="property.comuna" />
+      </label>
+
+      <label class="field">
+        <span>Estado</span>
+        <select [(ngModel)]="property.status">
+          <option *ngFor="let status of statusOptions" [ngValue]="status">{{ status }}</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Corredor</span>
+        <select [(ngModel)]="property.corredor">
+          <option *ngFor="let corredor of corredores" [ngValue]="corredor">{{ corredor }}</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Propietario</span>
+        <input type="text" [(ngModel)]="property.owner" />
+      </label>
+
+      <label class="field">
+        <span>Arriendo Mensual</span>
+        <input type="text" [(ngModel)]="property.monthlyRent" />
+      </label>
+
+      <label class="field field-full">
+        <span>Última actualización</span>
+        <input type="text" [(ngModel)]="property.lastUpdate" />
+      </label>
+
+      <label class="field field-full">
+        <span>Notas</span>
+        <textarea rows="5" [(ngModel)]="property.notes"></textarea>
+      </label>
+    </div>
+
+    <div class="panel-footer">
+      <span class="helper-text">Edita información clave y guarda los cambios.</span>
+      <button type="button" class="save-button" (click)="saveChanges()">Guardar cambios</button>
+    </div>
+  </ng-container>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <h2>Sin selección</h2>
+      <p>Selecciona una propiedad para revisar o actualizar su información.</p>
+    </div>
+  </ng-template>
+</aside>

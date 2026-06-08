@@ -1,0 +1,50 @@
+<div class="dashboard-layout">
+  <app-sidebar class="sidebar-column"></app-sidebar>
+
+  <div class="main-column">
+    <app-topbar></app-topbar>
+
+    <main class="page-content">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Gestión inmobiliaria</p>
+          <h1>Mantener Propiedades</h1>
+          <p class="hero-copy">
+            Revisa estados, corredores y propietarios desde un mismo panel operativo.
+          </p>
+        </div>
+
+        <button type="button" class="primary-button">Nueva Propiedad</button>
+      </section>
+
+      <app-property-management-filters
+        [filters]="filters()"
+        [comunas]="comunas"
+        [corredores]="corredores"
+        (filtersChange)="updateFilters($event)"
+        (clear)="clearFilters()"
+      ></app-property-management-filters>
+
+      <section class="content-grid">
+        <app-property-management-table
+          [properties]="pagedProperties()"
+          [selectedPropertyId]="selectedPropertyId()"
+          [currentPage]="currentPage()"
+          [totalPages]="totalPages()"
+          [totalItems]="filteredProperties().length"
+          [rangeStart]="rangeStart()"
+          [rangeEnd]="rangeEnd()"
+          (selectProperty)="selectProperty($event)"
+          (previousPage)="previousPage()"
+          (nextPage)="nextPage()"
+        ></app-property-management-table>
+
+        <app-property-detail-panel
+          [property]="selectedProperty()"
+          [corredores]="corredores"
+          (save)="saveProperty($event)"
+        ></app-property-detail-panel>
+      </section>
+    </main>
+  </div>
+</div>

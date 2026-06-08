@@ -1,0 +1,46 @@
+<section class="filter-card">
+  <div class="filter-header">
+    <div>
+      <p class="eyebrow">Filtros</p>
+      <h2>Busca y ordena tu portafolio</h2>
+    </div>
+
+    <button type="button" class="clear-button" (click)="clear.emit()">Limpiar filtros</button>
+  </div>
+
+  <div class="filter-grid">
+    <label class="field">
+      <span>Estado</span>
+      <select
+        [ngModel]="filters.status"
+        (ngModelChange)="updateFilter('status', $event)"
+      >
+        <option *ngFor="let status of statusOptions" [ngValue]="status">{{ status }}</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Comuna</span>
+      <select
+        [ngModel]="filters.comuna"
+        (ngModelChange)="updateFilter('comuna', $event)"
+      >
+        <option value="Todas">Todas</option>
+        <option *ngFor="let comuna of comunas" [ngValue]="comuna">{{ comuna }}</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Corredor</span>
+      <select
+        [ngModel]="filters.corredor"
+        (ngModelChange)="updateFilter('corredor', $event)"
+      >
+        <option value="Todos">Todos</option>
+        <option *ngFor="let corredor of corredores" [ngValue]="corredor">
+          {{ corredor }}
+        </option>
+      </select>
+    </label>
+  </div>
+</section>
