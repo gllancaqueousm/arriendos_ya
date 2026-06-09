@@ -20,6 +20,7 @@ export class SidebarComponent {
     { label: 'Dashboard', path: '/dashboard', exact: true },
     { label: 'Propiedades', path: '/propiedades' },
     { label: 'Arrendatarios' },
+    { label: 'Asignaciones', path: '/asignaciones' },
     { label: 'Pagos' },
     { label: 'Reportes' },
     { label: 'Configuración' }
