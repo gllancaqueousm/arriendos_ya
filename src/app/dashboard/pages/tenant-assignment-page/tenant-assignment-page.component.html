@@ -1,0 +1,222 @@
+<div class="dashboard-layout">
+  <app-sidebar class="sidebar-column"></app-sidebar>
+
+  <div class="main-column">
+    <app-topbar></app-topbar>
+
+    <main class="page-content">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Gestión de contratos</p>
+          <h1>Asignar arrendatario a propiedad</h1>
+          <p class="hero-copy">
+            Vincula una propiedad disponible con un arrendatario registrado y define condiciones
+            contractuales.
+          </p>
+        </div>
+      </section>
+
+      <form #assignmentForm="ngForm" class="content-grid" novalidate>
+        <section class="assignment-card">
+          <article class="section-block">
+            <h2>Selección de entidades</h2>
+
+            <div class="field-grid">
+              <label class="field field-full">
+                <span>Propiedad disponible</span>
+                <select
+                  name="propertyId"
+                  required
+                  [ngModel]="formModel().propertyId"
+                  (ngModelChange)="updateField('propertyId', $event)"
+                >
+                  <option value="" disabled selected>Selecciona una propiedad</option>
+                  <option *ngFor="let property of availableProperties()" [ngValue]="property.id">
+                    {{ property.id }} · {{ property.address }}
+                  </option>
+                </select>
+              </label>
+
+              <label class="field field-full">
+                <span>Buscar arrendatario</span>
+                <input
+                  type="search"
+                  name="tenantQuery"
+                  placeholder="Nombre, correo o código"
+                  [ngModel]="tenantQuery()"
+                  (ngModelChange)="tenantQuery.set($event)"
+                />
+              </label>
+
+              <label class="field field-full">
+                <span>Arrendatario registrado</span>
+                <select
+                  name="tenantId"
+                  required
+                  [ngModel]="formModel().tenantId"
+                  (ngModelChange)="updateField('tenantId', $event)"
+                >
+                  <option value="" disabled selected>Selecciona un arrendatario</option>
+                  <option *ngFor="let tenant of filteredTenants()" [ngValue]="tenant.id">
+                    {{ tenant.fullName }} · {{ tenant.email }}
+                  </option>
+                </select>
+              </label>
+            </div>
+          </article>
+
+          <article class="section-block">
+            <h2>Condiciones económicas</h2>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Renta mensual (CLP)</span>
+                <input
+                  type="number"
+                  name="monthlyRent"
+                  min="1"
+                  required
+                  [ngModel]="formModel().monthlyRent"
+                  (ngModelChange)="updateField('monthlyRent', $event ? +$event : null)"
+                />
+              </label>
+
+              <label class="field">
+                <span>Mes(es) de garantía</span>
+                <input
+                  type="number"
+                  name="guaranteeMonths"
+                  min="1"
+                  required
+                  [ngModel]="formModel().guaranteeMonths"
+                  (ngModelChange)="updateField('guaranteeMonths', $event ? +$event : null)"
+                />
+              </label>
+
+              <label class="field">
+                <span>Fecha de inicio</span>
+                <input
+                  type="date"
+                  name="startDate"
+                  required
+                  [ngModel]="formModel().startDate"
+                  (ngModelChange)="updateField('startDate', $event)"
+                />
+              </label>
+
+              <label class="field">
+                <span>Fecha de término</span>
+                <input
+                  type="date"
+                  name="endDate"
+                  required
+                  [ngModel]="formModel().endDate"
+                  (ngModelChange)="updateField('endDate', $event)"
+                />
+              </label>
+
+              <label class="field">
+                <span>Día de pago</span>
+                <input
+                  type="number"
+                  name="paymentDay"
+                  min="1"
+                  max="31"
+                  required
+                  [ngModel]="formModel().paymentDay"
+                  (ngModelChange)="updateField('paymentDay', $event ? +$event : null)"
+                />
+              </label>
+
+              <label class="field">
+                <span>Reajuste semestral (%)</span>
+                <input
+                  type="number"
+                  name="semiannualAdjustment"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  required
+                  [ngModel]="formModel().semiannualAdjustment"
+                  (ngModelChange)="updateField('semiannualAdjustment', $event ? +$event : null)"
+                />
+              </label>
+            </div>
+
+            <p *ngIf="hasDateRangeError()" class="validation-message">
+              La fecha de término debe ser posterior a la fecha de inicio.
+            </p>
+          </article>
+        </section>
+
+        <aside class="summary-card">
+          <h2>Resumen de asignación</h2>
+
+          <dl>
+            <div>
+              <dt>Propiedad</dt>
+              <dd>{{ selectedProperty()?.address ?? 'Sin seleccionar' }}</dd>
+            </div>
+            <div>
+              <dt>Arrendatario</dt>
+              <dd>{{ selectedTenant()?.fullName ?? 'Sin seleccionar' }}</dd>
+            </div>
+            <div>
+              <dt>Renta mensual</dt>
+              <dd>{{ formModel().monthlyRent ? ('$' + formModel().monthlyRent) : '-' }}</dd>
+            </div>
+            <div>
+              <dt>Garantía</dt>
+              <dd>
+                {{
+                  formModel().guaranteeMonths
+                    ? formModel().guaranteeMonths + ' mes(es)'
+                    : '-'
+                }}
+              </dd>
+            </div>
+            <div>
+              <dt>Vigencia</dt>
+              <dd>
+                {{ formModel().startDate || '-' }} → {{ formModel().endDate || '-' }}
+              </dd>
+            </div>
+            <div>
+              <dt>Día de pago</dt>
+              <dd>{{ formModel().paymentDay || '-' }}</dd>
+            </div>
+            <div>
+              <dt>Reajuste semestral</dt>
+              <dd>
+                {{
+                  formModel().semiannualAdjustment !== null
+                    ? formModel().semiannualAdjustment + '%'
+                    : '-'
+                }}
+              </dd>
+            </div>
+          </dl>
+
+          <div class="actions">
+            <button
+              type="button"
+              class="primary-button"
+              [disabled]="assignmentForm.invalid || hasDateRangeError()"
+              (click)="confirmAssignment(assignmentForm)"
+            >
+              Confirmar asignación
+            </button>
+            <button type="button" class="secondary-button" (click)="saveDraft()">
+              Guardar como borrador
+            </button>
+            <button type="button" class="ghost-button" (click)="cancelProcess(assignmentForm)">
+              Cancelar proceso
+            </button>
+          </div>
+
+          <p class="feedback" *ngIf="feedbackMessage()">{{ feedbackMessage() }}</p>
+        </aside>
+      </form>
+    </main>
+  </div>
+</div>
