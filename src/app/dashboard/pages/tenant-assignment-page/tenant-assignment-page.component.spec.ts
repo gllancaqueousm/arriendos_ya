@@ -25,11 +25,11 @@ describe('TenantAssignmentPageComponent', () => {
     expect(compiled.textContent).toContain('Cancelar proceso');
   });
 
-  it('should only expose inactivo properties for assignment', () => {
+  it('should only expose non-available properties for assignment', () => {
     const fixture = TestBed.createComponent(TenantAssignmentPageComponent);
     fixture.detectChanges();
 
     expect(fixture.componentInstance.availableProperties().length).toBeGreaterThan(0);
-    expect(fixture.componentInstance.availableProperties().every((property) => property.status === 'Inactivo')).toBeTrue();
+    expect(fixture.componentInstance.availableProperties().every((property) => !property.disponible)).toBeTrue();
   });
 });

@@ -1,86 +1,30 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { finalize } from 'rxjs';
 import { PropertyDetailPanelComponent } from '../../components/property-detail-panel/property-detail-panel.component';
 import { PropertyManagementFiltersComponent } from '../../components/property-management-filters/property-management-filters.component';
 import { PropertyManagementTableComponent } from '../../components/property-management-table/property-management-table.component';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { TopbarComponent } from '../../components/topbar/topbar.component';
 import { PropertyFilters, PropertyRecord } from '../../models/property.model';
+import { PropertyManagementService } from '../../services/property-management.service';
 
 const DEFAULT_FILTERS: PropertyFilters = {
-  status: 'Todos',
-  comuna: 'Todas',
-  corredor: 'Todos'
+  disponible: 'Todos',
+  comuna: 'Todas'
 };
 
-const MOCK_PROPERTIES: PropertyRecord[] = [
-  {
-    id: 'PR-001',
-    address: 'Av. Providencia 1250, Depto 402',
-    comuna: 'Providencia',
-    status: 'Activo',
-    corredor: 'Catalina Muñoz',
-    owner: 'María Paz Herrera',
-    monthlyRent: '$950.000',
-    lastUpdate: '08 Jun 2026',
-    notes: 'Contrato vigente hasta diciembre. Buen historial de pago.'
-  },
-  {
-    id: 'PR-002',
-    address: 'Los Militares 3480, Oficina 611',
-    comuna: 'Las Condes',
-    status: 'En Reparación',
-    corredor: 'Felipe Soto',
-    owner: 'Inmobiliaria Horizonte',
-    monthlyRent: '$1.450.000',
-    lastUpdate: '06 Jun 2026',
-    notes: 'Ajuste de climatización y pintura interior en curso.'
-  },
-  {
-    id: 'PR-003',
-    address: 'San Diego 415, Local 8',
-    comuna: 'Santiago',
-    status: 'Activo',
-    corredor: 'Josefa Ríos',
-    owner: 'Carlos Méndez',
-    monthlyRent: '$780.000',
-    lastUpdate: '05 Jun 2026',
-    notes: 'Propiedad comercial con ocupación al 100%.'
-  },
-  {
-    id: 'PR-004',
-    address: 'Irarrázaval 2110, Depto 1203',
-    comuna: 'Ñuñoa',
-    status: 'Inactivo',
-    corredor: 'Catalina Muñoz',
-    owner: 'Patricia Silva',
-    monthlyRent: '$680.000',
-    lastUpdate: '03 Jun 2026',
-    notes: 'Disponible para publicación desde la próxima semana.'
-  },
-  {
-    id: 'PR-005',
-    address: 'Avenida Perú 932, Casa 14',
-    comuna: 'Recoleta',
-    status: 'Activo',
-    corredor: 'Felipe Soto',
-    owner: 'Pedro Riquelme',
-    monthlyRent: '$830.000',
-    lastUpdate: '02 Jun 2026',
-    notes: 'Arrendatario renovó por 12 meses.'
-  },
-  {
-    id: 'PR-006',
-    address: 'Alonso de Córdova 5870, Depto 901',
-    comuna: 'Vitacura',
-    status: 'Activo',
-    corredor: 'Josefa Ríos',
-    owner: 'Andrea Contreras',
-    monthlyRent: '$1.920.000',
-    lastUpdate: '01 Jun 2026',
-    notes: 'Pendiente actualización de inventario.'
-  }
-];
+const EMPTY_PROPERTY: PropertyRecord = {
+  id: 0,
+  direccion: '',
+  comuna: '',
+  ciudad: '',
+  region: '',
+  numeroHabitaciones: 0,
+  numeroBanos: 0,
+  precioArriendo: 0,
+  disponible: true
+};
 
 @Component({
   selector: 'app-property-management-page',
@@ -97,23 +41,28 @@ const MOCK_PROPERTIES: PropertyRecord[] = [
   styleUrl: './property-management-page.component.css'
 })
 export class PropertyManagementPageComponent {
+  private readonly propertyService = inject(PropertyManagementService);
+
   readonly pageSize = 5;
-  readonly properties = signal<PropertyRecord[]>(MOCK_PROPERTIES);
+  readonly properties = signal<PropertyRecord[]>([]);
   readonly filters = signal<PropertyFilters>(DEFAULT_FILTERS);
   readonly currentPage = signal(1);
-  readonly selectedPropertyId = signal<string | null>(MOCK_PROPERTIES[0]?.id ?? null);
+  readonly selectedPropertyId = signal<number | null>(null);
+  readonly isCreating = signal(false);
+  readonly isLoading = signal(false);
+  readonly isSaving = signal(false);
+  readonly isDeleting = signal(false);
+  readonly errorMessage = signal('');
 
-  readonly comunas = Array.from(new Set(MOCK_PROPERTIES.map((property) => property.comuna)));
-  readonly corredores = Array.from(new Set(MOCK_PROPERTIES.map((property) => property.corredor)));
+  readonly comunas = computed(() => Array.from(new Set(this.properties().map((p) => p.comuna))));
 
   readonly filteredProperties = computed(() =>
     this.properties().filter((property) => {
       const filters = this.filters();
 
       return (
-        (filters.status === 'Todos' || property.status === filters.status) &&
-        (filters.comuna === 'Todas' || property.comuna === filters.comuna) &&
-        (filters.corredor === 'Todos' || property.corredor === filters.corredor)
+        (filters.disponible === 'Todos' || property.disponible === filters.disponible) &&
+        (filters.comuna === 'Todas' || property.comuna === filters.comuna)
       );
     })
   );
@@ -130,9 +79,13 @@ export class PropertyManagementPageComponent {
   readonly selectedProperty = computed(
     () =>
       this.filteredProperties().find((property) => property.id === this.selectedPropertyId()) ??
-      this.filteredProperties()[0] ??
       null
   );
+
+  readonly panelProperty = computed<PropertyRecord | null>(() => {
+    if (this.isCreating()) return { ...EMPTY_PROPERTY };
+    return this.selectedProperty();
+  });
 
   readonly rangeStart = computed(() =>
     this.filteredProperties().length ? (this.currentPage() - 1) * this.pageSize + 1 : 0
@@ -143,19 +96,13 @@ export class PropertyManagementPageComponent {
   );
 
   constructor() {
+    this.loadProperties();
+
     effect(() => {
-      const visibleProperties = this.filteredProperties();
       const totalPages = this.totalPages();
 
       if (this.currentPage() > totalPages) {
         this.currentPage.set(totalPages);
-      }
-
-      if (
-        visibleProperties.length &&
-        !visibleProperties.some((property) => property.id === this.selectedPropertyId())
-      ) {
-        this.selectedPropertyId.set(visibleProperties[0].id);
       }
     });
   }
@@ -172,6 +119,14 @@ export class PropertyManagementPageComponent {
 
   selectProperty(property: PropertyRecord): void {
     this.selectedPropertyId.set(property.id);
+    this.isCreating.set(false);
+    this.errorMessage.set('');
+  }
+
+  newProperty(): void {
+    this.selectedPropertyId.set(null);
+    this.isCreating.set(true);
+    this.errorMessage.set('');
   }
 
   previousPage(): void {
@@ -183,11 +138,69 @@ export class PropertyManagementPageComponent {
   }
 
   saveProperty(property: PropertyRecord): void {
-    this.properties.update((properties) =>
-      properties.map((currentProperty) =>
-        currentProperty.id === property.id ? { ...property } : currentProperty
-      )
-    );
-    this.selectedPropertyId.set(property.id);
+    this.isSaving.set(true);
+    this.errorMessage.set('');
+
+    const request$ =
+      property.id === 0
+        ? this.propertyService.createProperty({
+            direccion: property.direccion,
+            comuna: property.comuna,
+            ciudad: property.ciudad,
+            region: property.region,
+            numeroHabitaciones: property.numeroHabitaciones,
+            numeroBanos: property.numeroBanos,
+            precioArriendo: property.precioArriendo,
+            disponible: property.disponible
+          })
+        : this.propertyService.updateProperty(property.id, property);
+
+    request$.pipe(finalize(() => this.isSaving.set(false))).subscribe({
+      next: (saved) => {
+        this.isCreating.set(false);
+        this.selectedPropertyId.set(saved.id);
+        this.loadProperties();
+      },
+      error: () => {
+        this.errorMessage.set('No se pudo guardar la propiedad. Intenta nuevamente.');
+      }
+    });
+  }
+
+  deleteProperty(property: PropertyRecord): void {
+    this.isDeleting.set(true);
+    this.errorMessage.set('');
+
+    this.propertyService
+      .deleteProperty(property.id)
+      .pipe(finalize(() => this.isDeleting.set(false)))
+      .subscribe({
+        next: () => {
+          if (this.selectedPropertyId() === property.id) {
+            this.selectedPropertyId.set(null);
+          }
+          this.loadProperties();
+        },
+        error: () => {
+          this.errorMessage.set('No se pudo eliminar la propiedad. Intenta nuevamente.');
+        }
+      });
+  }
+
+  private loadProperties(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    this.propertyService
+      .listProperties()
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe({
+        next: (properties) => {
+          this.properties.set(properties);
+        },
+        error: () => {
+          this.errorMessage.set('No se pudieron cargar las propiedades.');
+        }
+      });
   }
 }
