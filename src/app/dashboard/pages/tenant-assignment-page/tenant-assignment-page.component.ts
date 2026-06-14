@@ -13,7 +13,7 @@ interface TenantRecord {
 }
 
 interface AssignmentFormValue {
-  propertyId: string;
+  propertyId: number | null;
   tenantId: string;
   monthlyRent: number | null;
   guaranteeMonths: number | null;
@@ -25,48 +25,48 @@ interface AssignmentFormValue {
 
 const MOCK_PROPERTIES: PropertyRecord[] = [
   {
-    id: 'PR-001',
-    address: 'Av. Providencia 1250, Depto 402',
+    id: 1,
+    direccion: 'Av. Providencia 1250, Depto 402',
     comuna: 'Providencia',
-    status: 'Activo',
-    corredor: 'Catalina Muñoz',
-    owner: 'María Paz Herrera',
-    monthlyRent: '$950.000',
-    lastUpdate: '08 Jun 2026',
-    notes: 'Contrato vigente hasta diciembre. Buen historial de pago.'
+    ciudad: 'Santiago',
+    region: 'Metropolitana',
+    numeroHabitaciones: 2,
+    numeroBanos: 1,
+    precioArriendo: 950000,
+    disponible: true
   },
   {
-    id: 'PR-004',
-    address: 'Irarrázaval 2110, Depto 1203',
+    id: 4,
+    direccion: 'Irarrázaval 2110, Depto 1203',
     comuna: 'Ñuñoa',
-    status: 'Inactivo',
-    corredor: 'Catalina Muñoz',
-    owner: 'Patricia Silva',
-    monthlyRent: '$680.000',
-    lastUpdate: '03 Jun 2026',
-    notes: 'Disponible para publicación desde la próxima semana.'
+    ciudad: 'Santiago',
+    region: 'Metropolitana',
+    numeroHabitaciones: 3,
+    numeroBanos: 2,
+    precioArriendo: 680000,
+    disponible: false
   },
   {
-    id: 'PR-005',
-    address: 'Avenida Perú 932, Casa 14',
+    id: 5,
+    direccion: 'Avenida Perú 932, Casa 14',
     comuna: 'Recoleta',
-    status: 'Activo',
-    corredor: 'Felipe Soto',
-    owner: 'Pedro Riquelme',
-    monthlyRent: '$830.000',
-    lastUpdate: '02 Jun 2026',
-    notes: 'Arrendatario renovó por 12 meses.'
+    ciudad: 'Santiago',
+    region: 'Metropolitana',
+    numeroHabitaciones: 2,
+    numeroBanos: 1,
+    precioArriendo: 830000,
+    disponible: true
   },
   {
-    id: 'PR-007',
-    address: 'Manuel Montt 1510, Depto 302',
+    id: 7,
+    direccion: 'Manuel Montt 1510, Depto 302',
     comuna: 'Providencia',
-    status: 'Inactivo',
-    corredor: 'Josefa Ríos',
-    owner: 'Claudio Méndez',
-    monthlyRent: '$760.000',
-    lastUpdate: '09 Jun 2026',
-    notes: 'Apta para nuevo proceso de arriendo.'
+    ciudad: 'Santiago',
+    region: 'Metropolitana',
+    numeroHabitaciones: 1,
+    numeroBanos: 1,
+    precioArriendo: 760000,
+    disponible: false
   }
 ];
 
@@ -92,7 +92,7 @@ const MOCK_TENANTS: TenantRecord[] = [
 ];
 
 const EMPTY_FORM: AssignmentFormValue = {
-  propertyId: '',
+  propertyId: null,
   tenantId: '',
   monthlyRent: null,
   guaranteeMonths: null,
@@ -111,7 +111,7 @@ const EMPTY_FORM: AssignmentFormValue = {
 })
 export class TenantAssignmentPageComponent {
   readonly availableProperties = signal<PropertyRecord[]>(
-    MOCK_PROPERTIES.filter((property) => property.status === 'Inactivo')
+    MOCK_PROPERTIES.filter((property) => !property.disponible)
   );
 
   readonly allTenants = signal<TenantRecord[]>(MOCK_TENANTS);
@@ -156,7 +156,7 @@ export class TenantAssignmentPageComponent {
     const property = this.selectedProperty();
     const tenant = this.selectedTenant();
     this.feedbackMessage.set(
-      `Asignación confirmada: ${tenant?.fullName ?? 'Arrendatario'} en ${property?.address ?? 'propiedad'}.`
+      `Asignación confirmada: ${tenant?.fullName ?? 'Arrendatario'} en ${property?.direccion ?? 'propiedad'}.`
     );
   }
 

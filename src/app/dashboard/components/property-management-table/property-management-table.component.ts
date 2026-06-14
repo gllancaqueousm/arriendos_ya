@@ -11,27 +11,27 @@ import { PropertyRecord } from '../../models/property.model';
 })
 export class PropertyManagementTableComponent {
   @Input() properties: PropertyRecord[] = [];
-  @Input() selectedPropertyId: string | null = null;
+  @Input() selectedPropertyId: number | null = null;
   @Input() currentPage = 1;
   @Input() totalPages = 1;
   @Input() totalItems = 0;
   @Input() rangeStart = 0;
   @Input() rangeEnd = 0;
+  @Input() isLoading = false;
+  @Input() isDeleting = false;
 
   @Output() readonly selectProperty = new EventEmitter<PropertyRecord>();
+  @Output() readonly deleteProperty = new EventEmitter<PropertyRecord>();
+  @Output() readonly newProperty = new EventEmitter<void>();
   @Output() readonly previousPage = new EventEmitter<void>();
   @Output() readonly nextPage = new EventEmitter<void>();
 
-  readonly visibleColumns = ['ID', 'Dirección', 'Comuna', 'Estado', 'Corredor', 'Propietario'];
+  readonly visibleColumns = ['ID', 'Dirección', 'Comuna', 'Ciudad', 'Precio Arriendo', 'Disponible'];
 
-  getStatusClass(status: PropertyRecord['status']): string {
-    switch (status) {
-      case 'Activo':
-        return 'status-activo';
-      case 'Inactivo':
-        return 'status-inactivo';
-      case 'En Reparación':
-        return 'status-reparacion';
+  confirmDelete(property: PropertyRecord, event: MouseEvent): void {
+    event.stopPropagation();
+    if (confirm(`¿Eliminar la propiedad "${property.direccion}"?`)) {
+      this.deleteProperty.emit(property);
     }
   }
 }

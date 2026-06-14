@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PropertyFilters, PropertyStatus } from '../../models/property.model';
+import { PropertyFilters } from '../../models/property.model';
 
 @Component({
   selector: 'app-property-management-filters',
@@ -13,16 +13,14 @@ import { PropertyFilters, PropertyStatus } from '../../models/property.model';
 export class PropertyManagementFiltersComponent {
   @Input({ required: true }) filters!: PropertyFilters;
   @Input() comunas: string[] = [];
-  @Input() corredores: string[] = [];
 
   @Output() readonly filtersChange = new EventEmitter<PropertyFilters>();
   @Output() readonly clear = new EventEmitter<void>();
 
-  readonly statusOptions: Array<PropertyStatus | 'Todos'> = [
-    'Todos',
-    'Activo',
-    'Inactivo',
-    'En Reparación'
+  readonly disponibleOptions: Array<{ label: string; value: boolean | 'Todos' }> = [
+    { label: 'Todos', value: 'Todos' },
+    { label: 'Disponible', value: true },
+    { label: 'No disponible', value: false }
   ];
 
   updateFilter<K extends keyof PropertyFilters>(key: K, value: PropertyFilters[K]): void {

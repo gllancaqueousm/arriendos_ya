@@ -10,12 +10,12 @@
 
   <div class="filter-grid">
     <label class="field">
-      <span>Estado</span>
+      <span>Disponibilidad</span>
       <select
-        [ngModel]="filters.status"
-        (ngModelChange)="updateFilter('status', $event)"
+        [ngModel]="filters.disponible"
+        (ngModelChange)="updateFilter('disponible', $event)"
       >
-        <option *ngFor="let status of statusOptions" [ngValue]="status">{{ status }}</option>
+        <option *ngFor="let option of disponibleOptions" [ngValue]="option.value">{{ option.label }}</option>
       </select>
     </label>
 
@@ -27,19 +27,6 @@
       >
         <option value="Todas">Todas</option>
         <option *ngFor="let comuna of comunas" [ngValue]="comuna">{{ comuna }}</option>
-      </select>
-    </label>
-
-    <label class="field">
-      <span>Corredor</span>
-      <select
-        [ngModel]="filters.corredor"
-        (ngModelChange)="updateFilter('corredor', $event)"
-      >
-        <option value="Todos">Todos</option>
-        <option *ngFor="let corredor of corredores" [ngValue]="corredor">
-          {{ corredor }}
-        </option>
       </select>
     </label>
   </div>

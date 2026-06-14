@@ -10,17 +10,18 @@
           <p class="eyebrow">Gestión inmobiliaria</p>
           <h1>Mantener Propiedades</h1>
           <p class="hero-copy">
-            Revisa estados, corredores y propietarios desde un mismo panel operativo.
+            Revisa estados, comunas y disponibilidad desde un mismo panel operativo.
           </p>
         </div>
 
-        <button type="button" class="primary-button">Nueva Propiedad</button>
+        <button type="button" class="primary-button" (click)="newProperty()">Nueva Propiedad</button>
       </section>
+
+      <p *ngIf="errorMessage()" class="error-banner">{{ errorMessage() }}</p>
 
       <app-property-management-filters
         [filters]="filters()"
-        [comunas]="comunas"
-        [corredores]="corredores"
+        [comunas]="comunas()"
         (filtersChange)="updateFilters($event)"
         (clear)="clearFilters()"
       ></app-property-management-filters>
@@ -34,14 +35,19 @@
           [totalItems]="filteredProperties().length"
           [rangeStart]="rangeStart()"
           [rangeEnd]="rangeEnd()"
+          [isLoading]="isLoading()"
+          [isDeleting]="isDeleting()"
           (selectProperty)="selectProperty($event)"
+          (deleteProperty)="deleteProperty($event)"
+          (newProperty)="newProperty()"
           (previousPage)="previousPage()"
           (nextPage)="nextPage()"
         ></app-property-management-table>
 
         <app-property-detail-panel
-          [property]="selectedProperty()"
-          [corredores]="corredores"
+          [property]="panelProperty()"
+          [isSaving]="isSaving()"
+          [errorMessage]="errorMessage()"
           (save)="saveProperty($event)"
         ></app-property-detail-panel>
       </section>

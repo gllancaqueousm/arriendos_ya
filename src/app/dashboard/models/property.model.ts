@@ -1,19 +1,16 @@
-export type PropertyStatus = 'Activo' | 'Inactivo' | 'En Reparación';
-
 export interface PropertyRecord {
-  id: string;
-  address: string;
+  id: number;
+  direccion: string;
   comuna: string;
-  status: PropertyStatus;
-  corredor: string;
-  owner: string;
-  monthlyRent: string;
-  lastUpdate: string;
-  notes: string;
+  ciudad: string;
+  region: string;
+  numeroHabitaciones: number;
+  numeroBanos: number;
+  precioArriendo: number;
+  disponible: boolean;
 }
 
 export interface PropertyFilters {
-  status: PropertyStatus | 'Todos';
+  disponible: boolean | 'Todos';
   comuna: string;
-  corredor: string;
 }
