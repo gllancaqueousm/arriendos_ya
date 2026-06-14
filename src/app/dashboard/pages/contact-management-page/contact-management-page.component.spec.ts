@@ -9,10 +9,40 @@ import { ContactManagementPageComponent } from './contact-management-page.compon
 
 const MOCK_PROPIETARIOS: ContactRecord[] = [
   {
-    rut: '12.345.678-9',
+    rut: '12.345.678-5',
     nombre: 'María',
     apellido: 'Pérez',
     telefono: '+56 9 1234 5678'
+  },
+  {
+    rut: '10.111.222-3',
+    nombre: 'Pedro',
+    apellido: 'González',
+    telefono: '+56 9 1111 1111'
+  },
+  {
+    rut: '14.567.890-K',
+    nombre: 'Laura',
+    apellido: 'Molina',
+    telefono: '+56 9 2222 2222'
+  },
+  {
+    rut: '16.234.567-4',
+    nombre: 'Carlos',
+    apellido: 'Ruiz',
+    telefono: '+56 9 3333 3333'
+  },
+  {
+    rut: '18.765.432-6',
+    nombre: 'Ana',
+    apellido: 'Silva',
+    telefono: '+56 9 4444 4444'
+  },
+  {
+    rut: '9.876.543-3',
+    nombre: 'Sofía',
+    apellido: 'Torres',
+    telefono: '+56 9 5555 5555'
   }
 ];
 
@@ -85,6 +115,24 @@ describe('ContactManagementPageComponent', () => {
     expect(fixture.componentInstance.formModel().nombre).toBe('');
   });
 
+  it('should paginate contacts in groups of five', () => {
+    const fixture = TestBed.createComponent(ContactManagementPageComponent);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.totalPages()).toBe(2);
+    expect(fixture.componentInstance.pagedContacts().length).toBe(5);
+    expect(fixture.componentInstance.rangeStart()).toBe(1);
+    expect(fixture.componentInstance.rangeEnd()).toBe(5);
+
+    fixture.componentInstance.nextPage();
+
+    expect(fixture.componentInstance.currentPage()).toBe(2);
+    expect(fixture.componentInstance.pagedContacts().length).toBe(1);
+    expect(fixture.componentInstance.pagedContacts()[0].rut).toBe(MOCK_PROPIETARIOS[5].rut);
+    expect(fixture.componentInstance.rangeStart()).toBe(6);
+    expect(fixture.componentInstance.rangeEnd()).toBe(6);
+  });
+
   it('should create or update a contact on save', () => {
     const fixture = TestBed.createComponent(ContactManagementPageComponent);
     fixture.detectChanges();
@@ -104,12 +152,27 @@ describe('ContactManagementPageComponent', () => {
     fixture.componentInstance.selectContact(MOCK_PROPIETARIOS[0]);
     fixture.componentInstance.updateField('telefono', '+56 9 9999 9999');
     fixture.componentInstance.saveContact(mockValidForm());
-    expect(serviceSpy.updateContact).toHaveBeenCalledWith('propietarios', '12.345.678-9', {
-      rut: '12.345.678-9',
+    expect(serviceSpy.updateContact).toHaveBeenCalledWith('propietarios', '12.345.678-5', {
+      rut: '12.345.678-5',
       nombre: 'María',
       apellido: 'Pérez',
       telefono: '+56 9 9999 9999'
     });
+  });
+
+  it('should validate chilean rut values before saving', () => {
+    const fixture = TestBed.createComponent(ContactManagementPageComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.updateField('rut', '12.345.678-0');
+    fixture.componentInstance.updateField('nombre', 'Paula');
+    fixture.componentInstance.updateField('apellido', 'Rojas');
+    fixture.componentInstance.updateField('telefono', '+56 9 2222 3333');
+    fixture.componentInstance.saveContact(mockValidForm());
+
+    expect(fixture.componentInstance.isRutValid('12.345.678-5')).toBeTrue();
+    expect(fixture.componentInstance.isRutValid('12.345.678-0')).toBeFalse();
+    expect(serviceSpy.createContact).not.toHaveBeenCalled();
   });
 });
 

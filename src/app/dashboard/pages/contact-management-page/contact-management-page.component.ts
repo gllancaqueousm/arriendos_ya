@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
@@ -15,6 +15,7 @@ const EMPTY_CONTACT: ContactRecord = {
 };
 
 type ContactCollection = Record<ContactResource, ContactRecord[]>;
+const PAGE_SIZE = 5;
 
 @Component({
   selector: 'app-contact-management-page',
@@ -26,11 +27,13 @@ type ContactCollection = Record<ContactResource, ContactRecord[]>;
 export class ContactManagementPageComponent {
   private readonly contactService = inject(ContactManagementService);
 
+  readonly pageSize = PAGE_SIZE;
   readonly activeTab = signal<ContactResource>('propietarios');
   readonly contacts = signal<ContactCollection>({
     propietarios: [],
     arrendatarios: []
   });
+  readonly currentPage = signal(1);
   readonly selectedRut = signal<string | null>(null);
   readonly formModel = signal<ContactRecord>({ ...EMPTY_CONTACT });
   readonly isLoading = signal(false);
@@ -39,6 +42,19 @@ export class ContactManagementPageComponent {
   readonly successMessage = signal('');
 
   readonly currentContacts = computed(() => this.contacts()[this.activeTab()]);
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.currentContacts().length / this.pageSize))
+  );
+  readonly pagedContacts = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize;
+    return this.currentContacts().slice(start, start + this.pageSize);
+  });
+  readonly rangeStart = computed(() =>
+    this.currentContacts().length ? (this.currentPage() - 1) * this.pageSize + 1 : 0
+  );
+  readonly rangeEnd = computed(() =>
+    Math.min(this.currentPage() * this.pageSize, this.currentContacts().length)
+  );
   readonly isEditing = computed(() => this.selectedRut() !== null);
   readonly tabTitle = computed(() =>
     this.activeTab() === 'propietarios' ? 'Propietarios' : 'Arrendatarios'
@@ -49,6 +65,14 @@ export class ContactManagementPageComponent {
 
   constructor() {
     this.loadContacts('propietarios');
+
+    effect(() => {
+      const totalPages = this.totalPages();
+
+      if (this.currentPage() > totalPages) {
+        this.currentPage.set(totalPages);
+      }
+    });
   }
 
   trackByRut(_: number, contact: ContactRecord): string {
@@ -65,6 +89,7 @@ export class ContactManagementPageComponent {
     }
 
     this.activeTab.set(resource);
+    this.currentPage.set(1);
     this.clearForm();
 
     if (!this.contacts()[resource].length) {
@@ -91,10 +116,19 @@ export class ContactManagementPageComponent {
     this.formModel.update((current) => ({ ...current, [field]: value }));
   }
 
+  isRutValid(value: string): boolean {
+    return isValidChileanRut(value);
+  }
+
+  hasRutValidationError(form: NgForm): boolean {
+    const control = form.controls['rut'];
+    return !!control && control.touched && !this.isRutValid(this.formModel().rut);
+  }
+
   saveContact(form: NgForm): void {
     form.control.markAllAsTouched();
 
-    if (form.invalid) {
+    if (form.invalid || !this.isRutValid(this.formModel().rut)) {
       return;
     }
 
@@ -147,4 +181,37 @@ export class ContactManagementPageComponent {
         }
       });
   }
+
+  previousPage(): void {
+    this.currentPage.update((page) => Math.max(1, page - 1));
+  }
+
+  nextPage(): void {
+    this.currentPage.update((page) => Math.min(this.totalPages(), page + 1));
+  }
+}
+
+function isValidChileanRut(value: string): boolean {
+  const normalized = value.replace(/\./g, '').replace(/-/g, '').trim().toUpperCase();
+
+  if (!/^\d{1,8}[0-9K]$/.test(normalized)) {
+    return false;
+  }
+
+  const body = normalized.slice(0, -1);
+  const verifier = normalized.slice(-1);
+
+  let sum = 0;
+  let multiplier = 2;
+
+  for (let index = body.length - 1; index >= 0; index -= 1) {
+    sum += Number(body[index]) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+
+  const remainder = 11 - (sum % 11);
+  const expectedVerifier =
+    remainder === 11 ? '0' : remainder === 10 ? 'K' : remainder.toString();
+
+  return verifier === expectedVerifier;
 }

@@ -55,7 +55,7 @@
               </thead>
               <tbody>
                 <tr
-                  *ngFor="let contact of currentContacts(); trackBy: trackByRut"
+                  *ngFor="let contact of pagedContacts(); trackBy: trackByRut"
                   [class.selected]="contact.rut === selectedRut()"
                   (click)="selectContact(contact)"
                 >
@@ -69,6 +69,20 @@
               </tbody>
             </table>
           </div>
+
+          <footer class="table-footer" *ngIf="!isLoading() && !errorMessage()">
+            <p>Mostrando {{ rangeStart() }}-{{ rangeEnd() }} de {{ currentContacts().length }} registros</p>
+
+            <div class="pagination">
+              <button type="button" (click)="previousPage()" [disabled]="currentPage() === 1">
+                Anterior
+              </button>
+              <span>Página {{ currentPage() }} de {{ totalPages() }}</span>
+              <button type="button" (click)="nextPage()" [disabled]="currentPage() === totalPages()">
+                Siguiente
+              </button>
+            </div>
+          </footer>
         </article>
 
         <form #contactForm="ngForm" class="form-card" novalidate>
@@ -103,9 +117,13 @@
               name="rut"
               required
               [readonly]="isEditing()"
+              [class.invalid]="hasRutValidationError(contactForm)"
               [ngModel]="formModel().rut"
               (ngModelChange)="updateField('rut', $event)"
             />
+            <small class="field-error" *ngIf="hasRutValidationError(contactForm)">
+              Ingresa un RUT chileno válido.
+            </small>
           </label>
 
           <label class="field">

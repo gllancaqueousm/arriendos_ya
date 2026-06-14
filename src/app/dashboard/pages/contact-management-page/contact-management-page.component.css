@@ -87,6 +87,8 @@
 
 .table-card {
   padding: 1.25rem;
+  display: grid;
+  gap: 1rem;
 }
 
 .card-header {
@@ -149,6 +151,38 @@ tbody tr.selected {
   color: #7b8298;
 }
 
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.table-footer p {
+  margin: 0;
+  color: #5f6780;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pagination button {
+  border: 1px solid #d9deea;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  color: #33405f;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .form-card {
   padding: 1.25rem;
   display: grid;
@@ -176,6 +210,16 @@ tbody tr.selected {
 .field input[readonly] {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+.field input.invalid {
+  border-color: #cc4545;
+  background: #fff6f6;
+}
+
+.field-error {
+  color: #cc4545;
+  font-size: 0.82rem;
 }
 
 .actions {
@@ -247,5 +291,10 @@ tbody tr.selected {
 
   .actions {
     flex-direction: column;
+  }
+
+  .table-footer {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
