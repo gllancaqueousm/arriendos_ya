@@ -30,9 +30,9 @@
                   [ngModel]="formModel().propertyId"
                   (ngModelChange)="updateField('propertyId', $event)"
                 >
-                  <option value="" disabled selected>Selecciona una propiedad</option>
+                  <option [ngValue]="null" disabled selected>Selecciona una propiedad</option>
                   <option *ngFor="let property of availableProperties()" [ngValue]="property.id">
-                    {{ property.id }} · {{ property.address }}
+                    {{ property.id }} · {{ property.direccion }}
                   </option>
                 </select>
               </label>
@@ -155,7 +155,7 @@
           <dl>
             <div>
               <dt>Propiedad</dt>
-              <dd>{{ selectedProperty()?.address ?? 'Sin seleccionar' }}</dd>
+              <dd>{{ selectedProperty()?.direccion ?? 'Sin seleccionar' }}</dd>
             </div>
             <div>
               <dt>Arrendatario</dt>

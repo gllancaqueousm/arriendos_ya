@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PropertyRecord, PropertyStatus } from '../../models/property.model';
+import { PropertyRecord } from '../../models/property.model';
 
 @Component({
   selector: 'app-property-detail-panel',
@@ -12,13 +12,12 @@ import { PropertyRecord, PropertyStatus } from '../../models/property.model';
 })
 export class PropertyDetailPanelComponent implements OnChanges {
   @Input() property: PropertyRecord | null = null;
-  @Input() corredores: string[] = [];
+  @Input() isSaving = false;
+  @Input() errorMessage = '';
 
   @Output() readonly save = new EventEmitter<PropertyRecord>();
 
   editableProperty: PropertyRecord | null = null;
-
-  readonly statusOptions: PropertyStatus[] = ['Activo', 'Inactivo', 'En Reparación'];
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['property']) {
