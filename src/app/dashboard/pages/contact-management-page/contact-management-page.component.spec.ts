@@ -1,5 +1,6 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NgForm } from '@angular/forms';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { ContactRecord } from '../../models/contact.model';
@@ -31,6 +32,9 @@ describe('ContactManagementPageComponent', () => {
   );
 
   beforeEach(async () => {
+    serviceSpy.listContacts.calls.reset();
+    serviceSpy.createContact.calls.reset();
+    serviceSpy.updateContact.calls.reset();
     serviceSpy.listContacts.and.callFake((resource) =>
       of(resource === 'propietarios' ? MOCK_PROPIETARIOS : MOCK_ARRENDATARIOS)
     );
@@ -67,4 +71,54 @@ describe('ContactManagementPageComponent', () => {
     fixture.componentInstance.setTab('arrendatarios');
     expect(serviceSpy.listContacts).toHaveBeenCalledWith('arrendatarios');
   });
+
+  it('should select and clear a contact', () => {
+    const fixture = TestBed.createComponent(ContactManagementPageComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.selectContact(MOCK_PROPIETARIOS[0]);
+    expect(fixture.componentInstance.selectedRut()).toBe(MOCK_PROPIETARIOS[0].rut);
+    expect(fixture.componentInstance.formModel().nombre).toBe('María');
+
+    fixture.componentInstance.clearForm();
+    expect(fixture.componentInstance.selectedRut()).toBeNull();
+    expect(fixture.componentInstance.formModel().nombre).toBe('');
+  });
+
+  it('should create or update a contact on save', () => {
+    const fixture = TestBed.createComponent(ContactManagementPageComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.updateField('rut', '11.111.111-1');
+    fixture.componentInstance.updateField('nombre', 'Paula');
+    fixture.componentInstance.updateField('apellido', 'Rojas');
+    fixture.componentInstance.updateField('telefono', '+56 9 2222 3333');
+    fixture.componentInstance.saveContact(mockValidForm());
+    expect(serviceSpy.createContact).toHaveBeenCalledWith('propietarios', {
+      rut: '11.111.111-1',
+      nombre: 'Paula',
+      apellido: 'Rojas',
+      telefono: '+56 9 2222 3333'
+    });
+
+    fixture.componentInstance.selectContact(MOCK_PROPIETARIOS[0]);
+    fixture.componentInstance.updateField('telefono', '+56 9 9999 9999');
+    fixture.componentInstance.saveContact(mockValidForm());
+    expect(serviceSpy.updateContact).toHaveBeenCalledWith('propietarios', '12.345.678-9', {
+      rut: '12.345.678-9',
+      nombre: 'María',
+      apellido: 'Pérez',
+      telefono: '+56 9 9999 9999'
+    });
+  });
 });
+
+function mockValidForm(): NgForm {
+  return {
+    control: {
+      markAllAsTouched: () => undefined
+    },
+    invalid: false,
+    resetForm: () => undefined
+  } as unknown as NgForm;
+}

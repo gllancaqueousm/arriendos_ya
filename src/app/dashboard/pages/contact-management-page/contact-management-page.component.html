@@ -72,7 +72,7 @@
         </article>
 
         <form #contactForm="ngForm" class="form-card" novalidate>
-          <h2>{{ isEditing() ? 'Editar' : 'Nuevo' }} {{ activeTab() === 'propietarios' ? 'propietario' : 'arrendatario' }}</h2>
+          <h2>{{ isEditing() ? 'Editar' : 'Nuevo' }} {{ entityLabel() }}</h2>
 
           <label class="field">
             <span>Nombre</span>

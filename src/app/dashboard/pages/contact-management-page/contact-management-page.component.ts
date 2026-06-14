@@ -43,6 +43,9 @@ export class ContactManagementPageComponent {
   readonly tabTitle = computed(() =>
     this.activeTab() === 'propietarios' ? 'Propietarios' : 'Arrendatarios'
   );
+  readonly entityLabel = computed(() =>
+    this.activeTab() === 'propietarios' ? 'Propietario' : 'Arrendatario'
+  );
 
   constructor() {
     this.loadContacts('propietarios');
@@ -111,8 +114,8 @@ export class ContactManagementPageComponent {
         this.clearForm(form);
         this.successMessage.set(
           selectedRut
-            ? `${this.tabTitle()} actualizado correctamente.`
-            : `${this.tabTitle()} creado correctamente.`
+            ? `${this.entityLabel()} actualizado correctamente.`
+            : `${this.entityLabel()} creado correctamente.`
         );
         this.loadContacts(resource);
       },
@@ -140,7 +143,7 @@ export class ContactManagementPageComponent {
           }
         },
         error: () => {
-          this.errorMessage.set(`No se pudo cargar ${this.tabTitle().toLowerCase()}.`);
+          this.errorMessage.set('No se pudieron cargar los contactos.');
         }
       });
   }
