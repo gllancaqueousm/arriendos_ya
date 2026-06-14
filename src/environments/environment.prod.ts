@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBasePath: '/api'
+  apiBasePath: 'https://arriendos-ya-cndxdwcshsbrfpfg.chilecentral-01.azurewebsites.net/api'
 };
