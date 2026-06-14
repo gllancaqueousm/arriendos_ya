@@ -204,8 +204,8 @@ function isValidChileanRut(value: string): boolean {
   let sum = 0;
   let multiplier = 2;
 
-  for (let index = body.length - 1; index >= 0; index -= 1) {
-    sum += Number(body[index]) * multiplier;
+  for (let digitIndex = body.length - 1; digitIndex >= 0; digitIndex -= 1) {
+    sum += Number(body[digitIndex]) * multiplier;
     multiplier = multiplier === 7 ? 2 : multiplier + 1;
   }
 
