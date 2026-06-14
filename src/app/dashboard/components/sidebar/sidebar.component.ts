@@ -19,7 +19,7 @@ export class SidebarComponent {
   readonly menuItems: SidebarMenuItem[] = [
     { label: 'Dashboard', path: '/dashboard', exact: true },
     { label: 'Propiedades', path: '/propiedades' },
-    { label: 'Arrendatarios' },
+    { label: 'Partícipes', path: '/contactos' },
     { label: 'Asignaciones', path: '/asignaciones' },
     { label: 'Pagos' },
     { label: 'Reportes' },
