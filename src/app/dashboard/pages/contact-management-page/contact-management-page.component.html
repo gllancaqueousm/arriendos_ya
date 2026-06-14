@@ -1,0 +1,174 @@
+<div class="dashboard-layout">
+  <app-sidebar class="sidebar-column"></app-sidebar>
+
+  <div class="main-column">
+    <app-topbar></app-topbar>
+
+    <main class="page-content">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Partícipes</p>
+          <h1>Gestión de Contactos</h1>
+          <p class="hero-copy">
+            Administra propietarios y arrendatarios desde un mismo panel operativo.
+          </p>
+        </div>
+      </section>
+
+      <section class="tab-group">
+        <button
+          type="button"
+          class="tab-button"
+          [class.active]="activeTab() === 'propietarios'"
+          (click)="setTab('propietarios')"
+        >
+          Propietarios
+        </button>
+        <button
+          type="button"
+          class="tab-button"
+          [class.active]="activeTab() === 'arrendatarios'"
+          (click)="setTab('arrendatarios')"
+        >
+          Arrendatarios
+        </button>
+      </section>
+
+      <section class="content-grid">
+        <article class="table-card">
+          <header class="card-header">
+            <h2>Listado de {{ tabTitle() }}</h2>
+            <span>{{ currentContacts().length }} registros</span>
+          </header>
+
+          <p class="state-message" *ngIf="isLoading()">Cargando registros...</p>
+          <p class="state-message error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+
+          <div class="table-wrapper" *ngIf="!isLoading() && !errorMessage()">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>RUT</th>
+                  <th>Teléfono</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  *ngFor="let contact of pagedContacts(); trackBy: trackByRut"
+                  [class.selected]="contact.rut === selectedRut()"
+                  (click)="selectContact(contact)"
+                >
+                  <td>{{ getFullName(contact) }}</td>
+                  <td>{{ contact.rut }}</td>
+                  <td>{{ contact.telefono }}</td>
+                </tr>
+                <tr *ngIf="!currentContacts().length">
+                  <td colspan="3" class="empty-state">No hay registros para mostrar.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <footer class="table-footer" *ngIf="!isLoading() && !errorMessage()">
+            <p>Mostrando {{ rangeStart() }}-{{ rangeEnd() }} de {{ currentContacts().length }} registros</p>
+
+            <div class="pagination">
+              <button type="button" (click)="previousPage()" [disabled]="currentPage() === 1">
+                Anterior
+              </button>
+              <span>Página {{ currentPage() }} de {{ totalPages() }}</span>
+              <button type="button" (click)="nextPage()" [disabled]="currentPage() === totalPages()">
+                Siguiente
+              </button>
+            </div>
+          </footer>
+        </article>
+
+        <form #contactForm="ngForm" class="form-card" novalidate>
+          <h2>{{ isEditing() ? 'Editar' : 'Nuevo' }} {{ entityLabel() }}</h2>
+
+          <label class="field">
+            <span>Nombre</span>
+            <input
+              type="text"
+              name="nombre"
+              required
+              [ngModel]="formModel().nombre"
+              (ngModelChange)="updateField('nombre', $event)"
+            />
+          </label>
+
+          <label class="field">
+            <span>Apellido</span>
+            <input
+              type="text"
+              name="apellido"
+              required
+              [ngModel]="formModel().apellido"
+              (ngModelChange)="updateField('apellido', $event)"
+            />
+          </label>
+
+          <label class="field">
+            <span>RUT</span>
+            <input
+              type="text"
+              name="rut"
+              required
+              [readonly]="isEditing()"
+              [class.invalid]="hasRutValidationError(contactForm)"
+              [ngModel]="formModel().rut"
+              (ngModelChange)="updateField('rut', $event)"
+            />
+            <small class="field-error" *ngIf="hasRutValidationError(contactForm)">
+              Ingresa un RUT chileno válido.
+            </small>
+          </label>
+
+          <label class="field">
+            <span>Teléfono</span>
+            <input
+              type="text"
+              name="telefono"
+              required
+              [ngModel]="formModel().telefono"
+              (ngModelChange)="updateField('telefono', $event)"
+            />
+          </label>
+
+          <p class="state-message success" *ngIf="successMessage()">{{ successMessage() }}</p>
+          <p class="state-message error" *ngIf="errorMessage() && !isLoading()">{{ errorMessage() }}</p>
+
+          <div class="actions">
+            <button
+              type="button"
+              class="primary-button"
+              [disabled]="isSaving() || isDeleting()"
+              (click)="saveContact(contactForm)"
+            >
+              {{ isSaving() ? 'Guardando...' : 'Guardar' }}
+            </button>
+            <button
+              type="button"
+              class="secondary-button"
+              [disabled]="isSaving() || isDeleting()"
+              (click)="clearForm(contactForm)"
+            >
+              Limpiar
+            </button>
+            <button
+              *ngIf="isEditing()"
+              type="button"
+              class="danger-button"
+              [disabled]="isSaving() || isDeleting()"
+              (click)="deleteContact()"
+            >
+              {{ isDeleting() ? 'Eliminando...' : 'Eliminar' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+</div>
