@@ -38,6 +38,7 @@ export class ContactManagementPageComponent {
   readonly formModel = signal<ContactRecord>({ ...EMPTY_CONTACT });
   readonly isLoading = signal(false);
   readonly isSaving = signal(false);
+  readonly isDeleting = signal(false);
   readonly errorMessage = signal('');
   readonly successMessage = signal('');
 
@@ -157,6 +158,33 @@ export class ContactManagementPageComponent {
         this.errorMessage.set('No se pudo guardar el registro. Intenta nuevamente.');
       }
     });
+  }
+
+  deleteContact(): void {
+    const resource = this.activeTab();
+    const rut = this.selectedRut();
+
+    if (!rut) {
+      return;
+    }
+
+    this.isDeleting.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    this.contactService
+      .deleteContact(resource, rut)
+      .pipe(finalize(() => this.isDeleting.set(false)))
+      .subscribe({
+        next: () => {
+          this.clearForm();
+          this.successMessage.set(`${this.entityLabel()} eliminado correctamente.`);
+          this.loadContacts(resource);
+        },
+        error: () => {
+          this.errorMessage.set('No se pudo eliminar el registro. Intenta nuevamente.');
+        }
+      });
   }
 
   private loadContacts(resource: ContactResource): void {

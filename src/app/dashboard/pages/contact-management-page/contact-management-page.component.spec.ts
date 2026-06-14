@@ -58,18 +58,20 @@ const MOCK_ARRENDATARIOS: ContactRecord[] = [
 describe('ContactManagementPageComponent', () => {
   const serviceSpy = jasmine.createSpyObj<ContactManagementService>(
     'ContactManagementService',
-    ['listContacts', 'createContact', 'updateContact']
+    ['listContacts', 'createContact', 'updateContact', 'deleteContact']
   );
 
   beforeEach(async () => {
     serviceSpy.listContacts.calls.reset();
     serviceSpy.createContact.calls.reset();
     serviceSpy.updateContact.calls.reset();
+    serviceSpy.deleteContact.calls.reset();
     serviceSpy.listContacts.and.callFake((resource) =>
       of(resource === 'propietarios' ? MOCK_PROPIETARIOS : MOCK_ARRENDATARIOS)
     );
     serviceSpy.createContact.and.returnValue(of(MOCK_PROPIETARIOS[0]));
     serviceSpy.updateContact.and.returnValue(of(MOCK_PROPIETARIOS[0]));
+    serviceSpy.deleteContact.and.returnValue(of(undefined));
 
     await TestBed.configureTestingModule({
       imports: [ContactManagementPageComponent],
@@ -173,6 +175,29 @@ describe('ContactManagementPageComponent', () => {
     expect(fixture.componentInstance.isRutValid('12.345.678-5')).toBeTrue();
     expect(fixture.componentInstance.isRutValid('12.345.678-0')).toBeFalse();
     expect(serviceSpy.createContact).not.toHaveBeenCalled();
+  });
+
+  it('should delete the selected contact and reload the list', () => {
+    const fixture = TestBed.createComponent(ContactManagementPageComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.selectContact(MOCK_PROPIETARIOS[0]);
+    expect(fixture.componentInstance.isEditing()).toBeTrue();
+
+    fixture.componentInstance.deleteContact();
+
+    expect(serviceSpy.deleteContact).toHaveBeenCalledWith('propietarios', '12.345.678-5');
+    expect(fixture.componentInstance.selectedRut()).toBeNull();
+    expect(fixture.componentInstance.successMessage()).toContain('eliminado');
+  });
+
+  it('should do nothing when deleteContact is called without a selected contact', () => {
+    const fixture = TestBed.createComponent(ContactManagementPageComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.deleteContact();
+
+    expect(serviceSpy.deleteContact).not.toHaveBeenCalled();
   });
 });
 

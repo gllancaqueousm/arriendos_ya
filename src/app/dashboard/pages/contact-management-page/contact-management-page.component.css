@@ -250,6 +250,11 @@ tbody tr.selected {
   color: #475086;
 }
 
+.danger-button {
+  background: #fdecea;
+  color: #cc4545;
+}
+
 .state-message {
   margin: 0;
   font-size: 0.9rem;

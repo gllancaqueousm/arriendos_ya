@@ -144,7 +144,7 @@
             <button
               type="button"
               class="primary-button"
-              [disabled]="isSaving()"
+              [disabled]="isSaving() || isDeleting()"
               (click)="saveContact(contactForm)"
             >
               {{ isSaving() ? 'Guardando...' : 'Guardar' }}
@@ -152,10 +152,19 @@
             <button
               type="button"
               class="secondary-button"
-              [disabled]="isSaving()"
+              [disabled]="isSaving() || isDeleting()"
               (click)="clearForm(contactForm)"
             >
               Limpiar
+            </button>
+            <button
+              *ngIf="isEditing()"
+              type="button"
+              class="danger-button"
+              [disabled]="isSaving() || isDeleting()"
+              (click)="deleteContact()"
+            >
+              {{ isDeleting() ? 'Eliminando...' : 'Eliminar' }}
             </button>
           </div>
         </form>
