@@ -189,6 +189,83 @@
   font-size: 0.9rem;
 }
 
+.feedback-success {
+  color: #2a7d4f;
+}
+
+.feedback-error {
+  color: #cc4545;
+}
+
+.demo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  color: #795b00;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  border-radius: 2rem;
+  white-space: nowrap;
+}
+
+.demo-inline {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #9a7b00;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 0.5rem;
+  padding: 0.1rem 0.4rem;
+  vertical-align: middle;
+}
+
+.contract-summary {
+  background: #f0f7ff;
+  border: 1px solid #c5daff;
+  border-radius: 0.9rem;
+  padding: 0.85rem 1rem;
+}
+
+.contract-summary-title {
+  margin: 0 0 0.6rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #2a4a8a;
+}
+
+.contract-summary dl {
+  margin: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.contract-summary dt {
+  color: #7b8298;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.contract-summary dd {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #2a3350;
+}
+
+.reset-demo-button {
+  background: #fff3e0;
+  color: #8b4513;
+  border: 1px solid #ffcc80;
+  border-radius: 0.9rem;
+  padding: 0.78rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 @media (max-width: 1200px) {
   .content-grid {
     grid-template-columns: 1fr;
