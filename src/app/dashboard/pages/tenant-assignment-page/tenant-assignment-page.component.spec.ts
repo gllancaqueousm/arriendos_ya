@@ -47,11 +47,13 @@ describe('TenantAssignmentPageComponent', () => {
     propertyServiceSpy.assignTenant.calls.reset();
     contactServiceSpy.listContacts.calls.reset();
     contractServiceSpy.saveContract.calls.reset();
+    contractServiceSpy.getAll.calls.reset();
     contractServiceSpy.getByPropertyId.calls.reset();
     contractServiceSpy.clearAll.calls.reset();
 
     propertyServiceSpy.listProperties.and.returnValue(of([MOCK_PROPERTY]));
     contactServiceSpy.listContacts.and.returnValue(of([MOCK_CONTACT]));
+    contractServiceSpy.getAll.and.returnValue({});
     contractServiceSpy.getByPropertyId.and.returnValue(null);
 
     await TestBed.configureTestingModule({
@@ -94,6 +96,36 @@ describe('TenantAssignmentPageComponent', () => {
 
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('Modo demo');
+  });
+
+  it('should list saved assignments when the option is enabled', () => {
+    contractServiceSpy.getAll.and.returnValue({
+      4: {
+        propiedadId: 4,
+        arrendatarioRut: '12345678-9',
+        montoMensual: 680000,
+        mesGarantia: 1,
+        fechaInicio: '2026-07-01',
+        fechaTermino: '2027-06-30',
+        diaPago: 5,
+        reajusteSemestral: 3,
+        estado: 'ACTIVO',
+        origen: 'demo-local',
+        createdAt: new Date().toISOString()
+      }
+    });
+
+    const fixture = TestBed.createComponent(TenantAssignmentPageComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.toggleAssignmentsList();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Asignaciones realizadas');
+    expect(compiled.textContent).toContain('Irarrázaval 2110, Depto 1203');
+    expect(compiled.textContent).toContain('Camila Torres');
+    expect(compiled.textContent).toContain('12345678-9');
   });
 
   it('should call assignTenant and saveContract on successful confirmation', () => {
@@ -178,4 +210,3 @@ describe('TenantAssignmentPageComponent', () => {
     expect(fixture.componentInstance.feedbackMessage()).toContain('Demo reiniciada');
   });
 });
-

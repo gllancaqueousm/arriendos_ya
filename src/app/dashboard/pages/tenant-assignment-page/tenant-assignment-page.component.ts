@@ -15,6 +15,12 @@ interface TenantRecord {
   phone: string;
 }
 
+interface SavedAssignmentSummary {
+  contract: SimulatedContract;
+  propertyAddress: string;
+  tenantName: string;
+}
+
 interface AssignmentFormValue {
   propertyId: number | null;
   tenantId: string;
@@ -49,15 +55,19 @@ export class TenantAssignmentPageComponent implements OnInit {
   private readonly contactService = inject(ContactManagementService);
   private readonly contractService = inject(SimulatedContractService);
 
-  readonly availableProperties = signal<PropertyRecord[]>([]);
-
+  readonly allProperties = signal<PropertyRecord[]>([]);
   readonly allTenants = signal<TenantRecord[]>([]);
+  readonly savedContracts = signal<Record<number, SimulatedContract>>({});
   readonly tenantQuery = signal('');
   readonly formModel = signal<AssignmentFormValue>({ ...EMPTY_FORM });
   readonly feedbackMessage = signal('');
   readonly feedbackType = signal<'success' | 'error' | 'info'>('info');
   readonly isSubmitting = signal(false);
+  readonly showAssignments = signal(false);
   readonly confirmedContract = signal<SimulatedContract | null>(null);
+  readonly availableProperties = computed(() =>
+    this.allProperties().filter((property) => !property.disponible)
+  );
 
   readonly filteredTenants = computed(() => {
     const query = this.tenantQuery().trim().toLowerCase();
@@ -77,14 +87,30 @@ export class TenantAssignmentPageComponent implements OnInit {
   readonly selectedTenant = computed(
     () => this.allTenants().find((tenant) => tenant.id === this.formModel().tenantId) ?? null
   );
+  readonly savedAssignments = computed<SavedAssignmentSummary[]>(() =>
+    Object.values(this.savedContracts())
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+      .map((contract) => {
+        const property = this.allProperties().find((item) => item.id === contract.propiedadId);
+        const tenant = this.allTenants().find((item) => item.id === contract.arrendatarioRut);
+
+        return {
+          contract,
+          propertyAddress: property?.direccion ?? `Propiedad #${contract.propiedadId}`,
+          tenantName: tenant?.fullName ?? `Arrendatario ${contract.arrendatarioRut}`
+        };
+      })
+  );
   readonly hasDateRangeError = computed(() => {
     const values = this.formModel();
     return !!values.startDate && !!values.endDate && values.endDate < values.startDate;
   });
 
   ngOnInit(): void {
+    this.refreshSavedAssignments();
+
     this.propertyService.listProperties().subscribe((properties) => {
-      this.availableProperties.set(properties.filter((property) => !property.disponible));
+      this.allProperties.set(properties);
     });
 
     this.contactService.listContacts('arrendatarios').subscribe((contacts) => {
@@ -140,6 +166,7 @@ export class TenantAssignmentPageComponent implements OnInit {
         });
 
         this.confirmedContract.set(saved);
+        this.refreshSavedAssignments();
         this.isSubmitting.set(false);
         this.feedbackType.set('success');
         this.feedbackMessage.set(
@@ -161,6 +188,10 @@ export class TenantAssignmentPageComponent implements OnInit {
     this.feedbackMessage.set('Borrador guardado. Puedes continuar la asignación más tarde.');
   }
 
+  toggleAssignmentsList(): void {
+    this.showAssignments.update((current) => !current);
+  }
+
   cancelProcess(form: NgForm): void {
     this.formModel.set({ ...EMPTY_FORM });
     this.tenantQuery.set('');
@@ -172,6 +203,7 @@ export class TenantAssignmentPageComponent implements OnInit {
 
   resetDemo(form: NgForm): void {
     this.contractService.clearAll();
+    this.refreshSavedAssignments();
     this.confirmedContract.set(null);
     this.formModel.set({ ...EMPTY_FORM });
     this.tenantQuery.set('');
@@ -179,5 +211,8 @@ export class TenantAssignmentPageComponent implements OnInit {
     this.feedbackMessage.set('Demo reiniciada: contratos simulados eliminados.');
     form.resetForm({ ...EMPTY_FORM });
   }
-}
 
+  private refreshSavedAssignments(): void {
+    this.savedContracts.set(this.contractService.getAll());
+  }
+}

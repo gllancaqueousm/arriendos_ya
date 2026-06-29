@@ -228,6 +228,9 @@
             <button type="button" class="secondary-button" (click)="saveDraft()">
               Guardar como borrador
             </button>
+            <button type="button" class="secondary-button" (click)="toggleAssignmentsList()">
+              {{ showAssignments() ? 'Ocultar asignaciones realizadas' : 'Listar asignaciones realizadas' }}
+            </button>
             <button type="button" class="ghost-button" (click)="cancelProcess(assignmentForm)">
               Cancelar proceso
             </button>
@@ -244,9 +247,29 @@
           >
             {{ feedbackMessage() }}
           </p>
+
+          <section *ngIf="showAssignments()" class="saved-assignments">
+            <h3>Asignaciones realizadas</h3>
+
+            <p *ngIf="!savedAssignments().length" class="saved-assignments-empty">
+              Aún no hay asignaciones registradas.
+            </p>
+
+            <ul *ngIf="savedAssignments().length" class="saved-assignments-list">
+              <li *ngFor="let assignment of savedAssignments()">
+                <p class="saved-assignments-title">
+                  {{ assignment.propertyAddress }} · {{ assignment.tenantName }}
+                </p>
+                <p>RUT arrendatario: {{ assignment.contract.arrendatarioRut }}</p>
+                <p>Renta mensual: ${{ assignment.contract.montoMensual }}</p>
+                <p>
+                  Vigencia: {{ assignment.contract.fechaInicio }} → {{ assignment.contract.fechaTermino }}
+                </p>
+              </li>
+            </ul>
+          </section>
         </aside>
       </form>
     </main>
   </div>
 </div>
-
