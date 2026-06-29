@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
+import { switchMap } from 'rxjs';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { TopbarComponent } from '../../components/topbar/topbar.component';
 import { PropertyRecord } from '../../models/property.model';
@@ -66,7 +67,7 @@ export class TenantAssignmentPageComponent implements OnInit {
   readonly showAssignments = signal(false);
   readonly confirmedContract = signal<SimulatedContract | null>(null);
   readonly availableProperties = computed(() =>
-    this.allProperties().filter((property) => !property.disponible)
+    this.allProperties().filter((property) => property.disponible)
   );
 
   readonly filteredTenants = computed(() => {
@@ -152,8 +153,24 @@ export class TenantAssignmentPageComponent implements OnInit {
     this.isSubmitting.set(true);
     this.feedbackMessage.set('');
 
-    this.propertyService.assignTenant(property.id, tenant.id).subscribe({
-      next: () => {
+    this.propertyService
+      .assignTenant(property.id, tenant.id)
+      .pipe(
+        switchMap(() =>
+          this.propertyService.updateProperty(property.id, {
+            ...property,
+            disponible: false
+          })
+        )
+      )
+      .subscribe({
+      next: (assignedProperty) => {
+        this.allProperties.update((properties) =>
+          properties.map((item) =>
+            item.id === assignedProperty.id ? { ...assignedProperty, disponible: false } : item
+          )
+        );
+
         const saved = this.contractService.saveContract({
           propiedadId: property.id,
           arrendatarioRut: tenant.id,
@@ -170,17 +187,17 @@ export class TenantAssignmentPageComponent implements OnInit {
         this.isSubmitting.set(false);
         this.feedbackType.set('success');
         this.feedbackMessage.set(
-          `✓ Asignación confirmada (modo demo): ${tenant.fullName} en ${property.direccion}.`
+          `✓ Asignación confirmada: ${tenant.fullName} en ${property.direccion}.`
         );
       },
-      error: (err: unknown) => {
-        this.isSubmitting.set(false);
-        this.feedbackType.set('error');
-        const message =
-          err instanceof Error ? err.message : 'Error al comunicarse con el servidor.';
-        this.feedbackMessage.set(`Error al confirmar la asignación: ${message}`);
-      }
-    });
+        error: (err: unknown) => {
+          this.isSubmitting.set(false);
+          this.feedbackType.set('error');
+          const message =
+            err instanceof Error ? err.message : 'Error al comunicarse con el servidor.';
+          this.feedbackMessage.set(`Error al confirmar la asignación: ${message}`);
+        }
+      });
   }
 
   saveDraft(): void {

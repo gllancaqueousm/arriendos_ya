@@ -9,7 +9,19 @@ import { PropertyManagementService } from '../../services/property-management.se
 import { SimulatedContractService } from '../../services/simulated-contract.service';
 import { TenantAssignmentPageComponent } from './tenant-assignment-page.component';
 
-const MOCK_PROPERTY: PropertyRecord = {
+const MOCK_AVAILABLE_PROPERTY: PropertyRecord = {
+  id: 4,
+  direccion: 'Irarrázaval 2110, Depto 1203',
+  comuna: 'Ñuñoa',
+  ciudad: 'Santiago',
+  region: 'Metropolitana',
+  numeroHabitaciones: 3,
+  numeroBanos: 2,
+  precioArriendo: 680000,
+  disponible: true
+};
+
+const MOCK_ASSIGNED_PROPERTY: PropertyRecord = {
   id: 4,
   direccion: 'Irarrázaval 2110, Depto 1203',
   comuna: 'Ñuñoa',
@@ -31,7 +43,7 @@ const MOCK_CONTACT: ContactRecord = {
 describe('TenantAssignmentPageComponent', () => {
   const propertyServiceSpy = jasmine.createSpyObj<PropertyManagementService>(
     'PropertyManagementService',
-    ['listProperties', 'assignTenant']
+    ['listProperties', 'assignTenant', 'updateProperty']
   );
   const contactServiceSpy = jasmine.createSpyObj<ContactManagementService>(
     'ContactManagementService',
@@ -45,13 +57,15 @@ describe('TenantAssignmentPageComponent', () => {
   beforeEach(async () => {
     propertyServiceSpy.listProperties.calls.reset();
     propertyServiceSpy.assignTenant.calls.reset();
+    propertyServiceSpy.updateProperty.calls.reset();
     contactServiceSpy.listContacts.calls.reset();
     contractServiceSpy.saveContract.calls.reset();
     contractServiceSpy.getAll.calls.reset();
     contractServiceSpy.getByPropertyId.calls.reset();
     contractServiceSpy.clearAll.calls.reset();
 
-    propertyServiceSpy.listProperties.and.returnValue(of([MOCK_PROPERTY]));
+    propertyServiceSpy.listProperties.and.returnValue(of([MOCK_AVAILABLE_PROPERTY]));
+    propertyServiceSpy.updateProperty.and.returnValue(of(MOCK_ASSIGNED_PROPERTY));
     contactServiceSpy.listContacts.and.returnValue(of([MOCK_CONTACT]));
     contractServiceSpy.getAll.and.returnValue({});
     contractServiceSpy.getByPropertyId.and.returnValue(null);
@@ -82,12 +96,12 @@ describe('TenantAssignmentPageComponent', () => {
     expect(compiled.textContent).toContain('Cancelar proceso');
   });
 
-  it('should only expose non-available properties for assignment', () => {
+  it('should only expose available properties for assignment', () => {
     const fixture = TestBed.createComponent(TenantAssignmentPageComponent);
     fixture.detectChanges();
 
     expect(fixture.componentInstance.availableProperties().length).toBeGreaterThan(0);
-    expect(fixture.componentInstance.availableProperties().every((property) => !property.disponible)).toBeTrue();
+    expect(fixture.componentInstance.availableProperties().every((property) => property.disponible)).toBeTrue();
   });
 
   it('should show the demo mode badge', () => {
@@ -128,8 +142,8 @@ describe('TenantAssignmentPageComponent', () => {
     expect(compiled.textContent).toContain('12345678-9');
   });
 
-  it('should call assignTenant and saveContract on successful confirmation', () => {
-    propertyServiceSpy.assignTenant.and.returnValue(of(MOCK_PROPERTY));
+  it('should call assignTenant, updateProperty and saveContract on successful confirmation', () => {
+    propertyServiceSpy.assignTenant.and.returnValue(of(MOCK_AVAILABLE_PROPERTY));
     contractServiceSpy.saveContract.and.returnValue({
       propiedadId: 4,
       arrendatarioRut: '12345678-9',
@@ -161,8 +175,14 @@ describe('TenantAssignmentPageComponent', () => {
     fixture.componentInstance.confirmAssignment(form);
 
     expect(propertyServiceSpy.assignTenant).toHaveBeenCalledWith(4, '12345678-9');
+    expect(propertyServiceSpy.updateProperty).toHaveBeenCalledWith(4, {
+      ...MOCK_AVAILABLE_PROPERTY,
+      disponible: false
+    });
     expect(contractServiceSpy.saveContract).toHaveBeenCalled();
     expect(fixture.componentInstance.feedbackType()).toBe('success');
+    expect(fixture.componentInstance.allProperties()[0].disponible).toBeFalse();
+    expect(fixture.componentInstance.availableProperties()).toEqual([]);
   });
 
   it('should show an error and not save contract when assignTenant fails', () => {
