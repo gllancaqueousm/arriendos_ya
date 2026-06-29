@@ -59,7 +59,7 @@
                 >
                   <option value="" disabled selected>Selecciona un arrendatario</option>
                   <option *ngFor="let tenant of filteredTenants()" [ngValue]="tenant.id">
-                    {{ tenant.fullName }} · {{ tenant.email }}
+                    {{ tenant.fullName }} · {{ tenant.id }}
                   </option>
                 </select>
               </label>

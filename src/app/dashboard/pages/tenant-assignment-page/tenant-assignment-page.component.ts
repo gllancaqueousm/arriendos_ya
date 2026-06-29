@@ -5,13 +5,13 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { TopbarComponent } from '../../components/topbar/topbar.component';
 import { PropertyRecord } from '../../models/property.model';
 import { SimulatedContract } from '../../models/simulated-contract.model';
+import { ContactManagementService } from '../../services/contact-management.service';
 import { PropertyManagementService } from '../../services/property-management.service';
 import { SimulatedContractService } from '../../services/simulated-contract.service';
 
 interface TenantRecord {
   id: string;
   fullName: string;
-  email: string;
   phone: string;
 }
 
@@ -25,74 +25,6 @@ interface AssignmentFormValue {
   paymentDay: number | null;
   semiannualAdjustment: number | null;
 }
-
-const MOCK_PROPERTIES: PropertyRecord[] = [
-  {
-    id: 1,
-    direccion: 'Av. Providencia 1250, Depto 402',
-    comuna: 'Providencia',
-    ciudad: 'Santiago',
-    region: 'Metropolitana',
-    numeroHabitaciones: 2,
-    numeroBanos: 1,
-    precioArriendo: 950000,
-    disponible: true
-  },
-  {
-    id: 4,
-    direccion: 'Irarrázaval 2110, Depto 1203',
-    comuna: 'Ñuñoa',
-    ciudad: 'Santiago',
-    region: 'Metropolitana',
-    numeroHabitaciones: 3,
-    numeroBanos: 2,
-    precioArriendo: 680000,
-    disponible: false
-  },
-  {
-    id: 5,
-    direccion: 'Avenida Perú 932, Casa 14',
-    comuna: 'Recoleta',
-    ciudad: 'Santiago',
-    region: 'Metropolitana',
-    numeroHabitaciones: 2,
-    numeroBanos: 1,
-    precioArriendo: 830000,
-    disponible: true
-  },
-  {
-    id: 7,
-    direccion: 'Manuel Montt 1510, Depto 302',
-    comuna: 'Providencia',
-    ciudad: 'Santiago',
-    region: 'Metropolitana',
-    numeroHabitaciones: 1,
-    numeroBanos: 1,
-    precioArriendo: 760000,
-    disponible: false
-  }
-];
-
-const MOCK_TENANTS: TenantRecord[] = [
-  {
-    id: 'AR-001',
-    fullName: 'Camila Torres',
-    email: 'camila.torres@mail.com',
-    phone: '+56 9 8512 4491'
-  },
-  {
-    id: 'AR-002',
-    fullName: 'Rodrigo Fuentes',
-    email: 'rodrigo.fuentes@mail.com',
-    phone: '+56 9 7781 2250'
-  },
-  {
-    id: 'AR-003',
-    fullName: 'Daniela Pizarro',
-    email: 'daniela.pizarro@mail.com',
-    phone: '+56 9 9223 6008'
-  }
-];
 
 const EMPTY_FORM: AssignmentFormValue = {
   propertyId: null,
@@ -114,13 +46,12 @@ const EMPTY_FORM: AssignmentFormValue = {
 })
 export class TenantAssignmentPageComponent implements OnInit {
   private readonly propertyService = inject(PropertyManagementService);
+  private readonly contactService = inject(ContactManagementService);
   private readonly contractService = inject(SimulatedContractService);
 
-  readonly availableProperties = signal<PropertyRecord[]>(
-    MOCK_PROPERTIES.filter((property) => !property.disponible)
-  );
+  readonly availableProperties = signal<PropertyRecord[]>([]);
 
-  readonly allTenants = signal<TenantRecord[]>(MOCK_TENANTS);
+  readonly allTenants = signal<TenantRecord[]>([]);
   readonly tenantQuery = signal('');
   readonly formModel = signal<AssignmentFormValue>({ ...EMPTY_FORM });
   readonly feedbackMessage = signal('');
@@ -135,7 +66,7 @@ export class TenantAssignmentPageComponent implements OnInit {
     }
 
     return this.allTenants().filter((tenant) =>
-      [tenant.fullName, tenant.email, tenant.id].some((field) => field.toLowerCase().includes(query))
+      [tenant.fullName, tenant.id].some((field) => field.toLowerCase().includes(query))
     );
   });
 
@@ -152,10 +83,19 @@ export class TenantAssignmentPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const propertyId = this.formModel().propertyId;
-    if (propertyId !== null) {
-      this.confirmedContract.set(this.contractService.getByPropertyId(propertyId));
-    }
+    this.propertyService.listProperties().subscribe((properties) => {
+      this.availableProperties.set(properties.filter((property) => !property.disponible));
+    });
+
+    this.contactService.listContacts('arrendatarios').subscribe((contacts) => {
+      this.allTenants.set(
+        contacts.map((contact) => ({
+          id: contact.rut,
+          fullName: `${contact.nombre} ${contact.apellido}`,
+          phone: contact.telefono
+        }))
+      );
+    });
   }
 
   updateField<K extends keyof AssignmentFormValue>(field: K, value: AssignmentFormValue[K]): void {

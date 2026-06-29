@@ -2,7 +2,9 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { ContactRecord } from '../../models/contact.model';
 import { PropertyRecord } from '../../models/property.model';
+import { ContactManagementService } from '../../services/contact-management.service';
 import { PropertyManagementService } from '../../services/property-management.service';
 import { SimulatedContractService } from '../../services/simulated-contract.service';
 import { TenantAssignmentPageComponent } from './tenant-assignment-page.component';
@@ -19,10 +21,21 @@ const MOCK_PROPERTY: PropertyRecord = {
   disponible: false
 };
 
+const MOCK_CONTACT: ContactRecord = {
+  rut: '12345678-9',
+  nombre: 'Camila',
+  apellido: 'Torres',
+  telefono: '+56 9 8512 4491'
+};
+
 describe('TenantAssignmentPageComponent', () => {
   const propertyServiceSpy = jasmine.createSpyObj<PropertyManagementService>(
     'PropertyManagementService',
-    ['assignTenant']
+    ['listProperties', 'assignTenant']
+  );
+  const contactServiceSpy = jasmine.createSpyObj<ContactManagementService>(
+    'ContactManagementService',
+    ['listContacts']
   );
   const contractServiceSpy = jasmine.createSpyObj<SimulatedContractService>(
     'SimulatedContractService',
@@ -30,10 +43,15 @@ describe('TenantAssignmentPageComponent', () => {
   );
 
   beforeEach(async () => {
+    propertyServiceSpy.listProperties.calls.reset();
     propertyServiceSpy.assignTenant.calls.reset();
+    contactServiceSpy.listContacts.calls.reset();
     contractServiceSpy.saveContract.calls.reset();
     contractServiceSpy.getByPropertyId.calls.reset();
     contractServiceSpy.clearAll.calls.reset();
+
+    propertyServiceSpy.listProperties.and.returnValue(of([MOCK_PROPERTY]));
+    contactServiceSpy.listContacts.and.returnValue(of([MOCK_CONTACT]));
     contractServiceSpy.getByPropertyId.and.returnValue(null);
 
     await TestBed.configureTestingModule({
@@ -42,6 +60,7 @@ describe('TenantAssignmentPageComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         { provide: PropertyManagementService, useValue: propertyServiceSpy },
+        { provide: ContactManagementService, useValue: contactServiceSpy },
         { provide: SimulatedContractService, useValue: contractServiceSpy }
       ]
     }).compileComponents();
@@ -81,7 +100,7 @@ describe('TenantAssignmentPageComponent', () => {
     propertyServiceSpy.assignTenant.and.returnValue(of(MOCK_PROPERTY));
     contractServiceSpy.saveContract.and.returnValue({
       propiedadId: 4,
-      arrendatarioRut: 'AR-001',
+      arrendatarioRut: '12345678-9',
       montoMensual: 680000,
       mesGarantia: 1,
       fechaInicio: '2026-07-01',
@@ -97,7 +116,7 @@ describe('TenantAssignmentPageComponent', () => {
     fixture.detectChanges();
 
     fixture.componentInstance.updateField('propertyId', 4);
-    fixture.componentInstance.updateField('tenantId', 'AR-001');
+    fixture.componentInstance.updateField('tenantId', '12345678-9');
     fixture.componentInstance.updateField('monthlyRent', 680000);
     fixture.componentInstance.updateField('guaranteeMonths', 1);
     fixture.componentInstance.updateField('startDate', '2026-07-01');
@@ -109,7 +128,7 @@ describe('TenantAssignmentPageComponent', () => {
     const form = { control: { markAllAsTouched: () => {} }, invalid: false } as any;
     fixture.componentInstance.confirmAssignment(form);
 
-    expect(propertyServiceSpy.assignTenant).toHaveBeenCalledWith(4, 'AR-001');
+    expect(propertyServiceSpy.assignTenant).toHaveBeenCalledWith(4, '12345678-9');
     expect(contractServiceSpy.saveContract).toHaveBeenCalled();
     expect(fixture.componentInstance.feedbackType()).toBe('success');
   });
@@ -123,7 +142,7 @@ describe('TenantAssignmentPageComponent', () => {
     fixture.detectChanges();
 
     fixture.componentInstance.updateField('propertyId', 4);
-    fixture.componentInstance.updateField('tenantId', 'AR-001');
+    fixture.componentInstance.updateField('tenantId', '12345678-9');
     fixture.componentInstance.updateField('monthlyRent', 680000);
     fixture.componentInstance.updateField('guaranteeMonths', 1);
     fixture.componentInstance.updateField('startDate', '2026-07-01');
