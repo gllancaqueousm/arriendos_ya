@@ -16,6 +16,7 @@ export class EventoService {
   }
 
   createEvento(evento: Omit<EventoRecord, 'id'>): Observable<EventoRecord> {
+    delete evento.fecha; // Remove the fecha property before sending the request
     return this.http.post<EventoRecord>(this.apiBasePath, evento);
   }
 }

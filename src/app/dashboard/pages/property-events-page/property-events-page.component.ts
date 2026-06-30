@@ -13,7 +13,11 @@ import { PropertyManagementService } from '../../services/property-management.se
 const EMPTY_EVENTO: Omit<EventoRecord, 'id' | 'propiedadId'> = {
   tipo: '',
   descripcion: '',
-  fecha: ''
+  fecha: '',
+  propiedad: {
+    id: 0
+  },
+  url: ""
 };
 
 @Component({
@@ -83,7 +87,7 @@ export class PropertyEventsPageComponent {
     this.successMessage.set('');
 
     this.eventoService
-      .createEvento({ ...form, propiedadId: this.propiedadId() })
+      .createEvento({ ...form, propiedad: { id: this.propiedadId() } })
       .pipe(finalize(() => this.isSaving.set(false)))
       .subscribe({
         next: (created) => {
