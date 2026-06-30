@@ -1,0 +1,150 @@
+<div class="dashboard-layout">
+  <app-sidebar class="sidebar-column"></app-sidebar>
+
+  <div class="main-column">
+    <app-topbar></app-topbar>
+
+    <main class="page-content">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Gestión de eventos</p>
+          <h1>Eventos de Propiedad</h1>
+          <p class="hero-copy" *ngIf="property()">
+            {{ property()!.direccion }}, {{ property()!.comuna }}
+          </p>
+        </div>
+
+        <button type="button" class="secondary-button" (click)="goBack()">
+          ← Volver a Propiedades
+        </button>
+      </section>
+
+      <p *ngIf="propertyError()" class="error-banner">{{ propertyError() }}</p>
+      <p *ngIf="eventosError()" class="error-banner">{{ eventosError() }}</p>
+
+      <div *ngIf="isLoading()" class="loading-state">Cargando...</div>
+
+      <section *ngIf="!isLoading()" class="content-grid">
+        <!-- Property info card -->
+        <div class="info-card" *ngIf="property() as prop">
+          <p class="eyebrow">Propiedad seleccionada</p>
+          <h2>{{ prop.direccion }}</h2>
+
+          <dl class="property-details">
+            <div class="detail-row">
+              <dt>Comuna</dt>
+              <dd>{{ prop.comuna }}</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Ciudad</dt>
+              <dd>{{ prop.ciudad }}</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Región</dt>
+              <dd>{{ prop.region }}</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Habitaciones</dt>
+              <dd>{{ prop.numeroHabitaciones }}</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Baños</dt>
+              <dd>{{ prop.numeroBanos }}</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Precio Arriendo</dt>
+              <dd>$ {{ prop.precioArriendo | number }}</dd>
+            </div>
+            <div class="detail-row">
+              <dt>Estado</dt>
+              <dd>
+                <span class="status-pill" [ngClass]="prop.disponible ? 'status-activo' : 'status-inactivo'">
+                  {{ prop.disponible ? 'Disponible' : 'No disponible' }}
+                </span>
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Right column: form + timeline -->
+        <div class="events-column">
+          <!-- Create event form -->
+          <div class="form-card">
+            <p class="eyebrow">Nuevo evento</p>
+            <h2>Registrar Evento</h2>
+
+            <p *ngIf="successMessage()" class="success-message">{{ successMessage() }}</p>
+            <p *ngIf="formError()" class="error-banner">{{ formError() }}</p>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Tipo de evento</span>
+                <select
+                  [ngModel]="formModel().tipo"
+                  (ngModelChange)="updateFormField('tipo', $event)"
+                >
+                  <option value="">Selecciona un tipo</option>
+                  <option *ngFor="let tipo of eventoTipos" [value]="tipo">{{ tipo }}</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Fecha</span>
+                <input
+                  type="date"
+                  [ngModel]="formModel().fecha"
+                  (ngModelChange)="updateFormField('fecha', $event)"
+                />
+              </label>
+
+              <label class="field field-full">
+                <span>Descripción</span>
+                <textarea
+                  rows="3"
+                  [ngModel]="formModel().descripcion"
+                  (ngModelChange)="updateFormField('descripcion', $event)"
+                  placeholder="Describe el evento..."
+                ></textarea>
+              </label>
+            </div>
+
+            <div class="form-footer">
+              <button
+                type="button"
+                class="primary-button"
+                [disabled]="isSaving()"
+                (click)="createEvento()"
+              >
+                <span *ngIf="isSaving()">Guardando...</span>
+                <span *ngIf="!isSaving()">Registrar evento</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Events timeline -->
+          <div class="timeline-card">
+            <p class="eyebrow">Historial</p>
+            <h2>Eventos Registrados</h2>
+
+            <div *ngIf="eventos().length === 0" class="empty-timeline">
+              No hay eventos registrados para esta propiedad.
+            </div>
+
+            <ul class="timeline" *ngIf="eventos().length > 0">
+              <li class="timeline-item" *ngFor="let evento of eventos()">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <span class="event-tipo">{{ evento.tipo }}</span>
+                    <span class="event-fecha">{{ evento.fecha }}</span>
+                  </div>
+                  <p class="event-descripcion">{{ evento.descripcion }}</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>

@@ -42,6 +42,13 @@
               <button type="button" (click)="selectProperty.emit(property); $event.stopPropagation()">
                 Editar
               </button>
+              <a
+                class="events-button"
+                [routerLink]="['/propiedades', property.id, 'eventos']"
+                (click)="$event.stopPropagation()"
+              >
+                Eventos
+              </a>
               <button
                 type="button"
                 [disabled]="isDeleting"
