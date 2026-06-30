@@ -117,6 +117,24 @@ tbody tr.selected {
   cursor: pointer;
 }
 
+.events-button {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #c7ccf0;
+  border-radius: 0.75rem;
+  background: #eef0fc;
+  color: #4a5bd4;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  font-size: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.events-button:hover {
+  background: #dde0f8;
+}
+
 .pagination {
   display: flex;
   align-items: center;

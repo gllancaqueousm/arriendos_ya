@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { PropertyRecord } from '../../models/property.model';
 
 @Component({
   selector: 'app-property-management-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './property-management-table.component.html',
   styleUrl: './property-management-table.component.css'
 })
