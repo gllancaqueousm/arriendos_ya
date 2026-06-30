@@ -58,7 +58,7 @@
                 >
                   <option value="" disabled selected>Selecciona un arrendatario</option>
                   <option *ngFor="let tenant of filteredTenants()" [ngValue]="tenant.id">
-                    {{ tenant.fullName }} · {{ tenant.email }}
+                    {{ tenant.fullName }} · {{ tenant.id }}
                   </option>
                 </select>
               </label>
@@ -197,24 +197,73 @@
             </div>
           </dl>
 
+          <div *ngIf="confirmedContract()" class="contract-summary">
+            <p class="contract-summary-title">📄 Contrato guardado (demo local)</p>
+            <dl>
+              <div>
+                <dt>Estado</dt>
+                <dd>{{ confirmedContract()!.estado }}</dd>
+              </div>
+              <div>
+                <dt>Origen</dt>
+                <dd>{{ confirmedContract()!.origen }}</dd>
+              </div>
+              <div>
+                <dt>Guardado el</dt>
+                <dd>{{ confirmedContract()!.createdAt | date:'dd/MM/yyyy HH:mm' }}</dd>
+              </div>
+            </dl>
+          </div>
+
           <div class="actions">
             <button
               type="button"
               class="primary-button"
-              [disabled]="assignmentForm.invalid || hasDateRangeError()"
+              [disabled]="assignmentForm.invalid || hasDateRangeError() || isSubmitting()"
               (click)="confirmAssignment(assignmentForm)"
             >
-              Confirmar asignación
+              {{ isSubmitting() ? 'Confirmando…' : 'Confirmar asignación' }}
             </button>
             <button type="button" class="secondary-button" (click)="saveDraft()">
               Guardar como borrador
             </button>
+            <button type="button" class="secondary-button" (click)="toggleAssignmentsList()">
+              {{ showAssignments() ? 'Ocultar asignaciones realizadas' : 'Listar asignaciones realizadas' }}
+            </button>
             <button type="button" class="ghost-button" (click)="cancelProcess(assignmentForm)">
               Cancelar proceso
-            </button>
+            </button> 
           </div>
 
-          <p class="feedback" *ngIf="feedbackMessage()">{{ feedbackMessage() }}</p>
+          <p
+            class="feedback"
+            [class.feedback-success]="feedbackType() === 'success'"
+            [class.feedback-error]="feedbackType() === 'error'"
+            *ngIf="feedbackMessage()"
+          >
+            {{ feedbackMessage() }}
+          </p>
+
+          <section *ngIf="showAssignments()" class="saved-assignments">
+            <h3>Asignaciones realizadas</h3>
+
+            <p *ngIf="!savedAssignments().length" class="saved-assignments-empty">
+              Aún no hay asignaciones registradas.
+            </p>
+
+            <ul *ngIf="savedAssignments().length" class="saved-assignments-list">
+              <li *ngFor="let assignment of savedAssignments()">
+                <p class="saved-assignments-title">
+                  {{ assignment.propertyAddress }} · {{ assignment.tenantName }}
+                </p>
+                <p>RUT arrendatario: {{ assignment.contract.arrendatarioRut }}</p>
+                <p>Renta mensual: ${{ assignment.contract.montoMensual }}</p>
+                <p>
+                  Vigencia: {{ assignment.contract.fechaInicio }} → {{ assignment.contract.fechaTermino }}
+                </p>
+              </li>
+            </ul>
+          </section>
         </aside>
       </form>
     </main>

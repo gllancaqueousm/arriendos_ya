@@ -30,4 +30,11 @@ export class PropertyManagementService {
   deleteProperty(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiBasePath}/${id}`);
   }
+
+  assignTenant(propiedadId: number, arrendatarioRut: string): Observable<PropertyRecord> {
+    return this.http.put<PropertyRecord>(
+      `${this.apiBasePath}/${propiedadId}/asignar-arrendatario/${arrendatarioRut}`,
+      {}
+    );
+  }
 }
